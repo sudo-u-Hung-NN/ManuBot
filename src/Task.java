@@ -1,8 +1,12 @@
+import sun.nio.ch.Net;
+
 import java.util.Random;
 
 public class Task {
     private int ID;
     private double activateTime;
+    private int gateOutID;
+    private int numGateOut;
     private String rangeRandom = Config.getInstance().getAsString("Task_active_range");
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
@@ -16,10 +20,23 @@ public class Task {
         return ranging;
     }
 
+    public int getGateOut() {
+        return this.gateOutID;
+    }
+
+    public void setGateOut(int numGateOut) {
+        Random rand = new Random();
+        this.gateOutID = 1 + rand.nextInt(numGateOut);
+    }
+
     public void setActivateTime(double now) {
         Random rand = new Random();
         double deltaT = rand.nextGaussian()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
         this.activateTime = now + deltaT;
+    }
+
+    public double getActivateTime() {
+        return activateTime;
     }
 
     public void setID(int ID) {
@@ -30,9 +47,16 @@ public class Task {
         return ID;
     }
 
+    public void Activate(Network net, double timeNow){
+        if (timeNow > getActivateTime()){
+            net.insertActiveTaskQueue(this);
+        }
+    }
+
     // Constructor
-    public Task(int ID, double timeNow){
+    public Task(int ID, double timeNow, int numGateOut){
         setID(ID);
         setActivateTime(timeNow);
+        setGateOut(numGateOut);
     }
 }

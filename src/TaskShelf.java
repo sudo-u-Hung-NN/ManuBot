@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public class TaskShelf {
     private int ID;
     private point location;
+    private int capacityMax = Config.getInstance().getAsInteger("Shelf_capacity");
     private ArrayList<Task> TaskList = new ArrayList<Task>();
 
     // Methods
@@ -29,6 +30,12 @@ public class TaskShelf {
     }
 
     public void requestTaking(Network net){
+
+    }
+
+
+
+    public void Running(){
 
     }
 

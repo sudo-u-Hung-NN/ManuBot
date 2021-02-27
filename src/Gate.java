@@ -56,13 +56,23 @@ public class Gate {
         this.makeTaskTime = 0;
     }
 
+    // Nếu mà gói tin sinh ra trước mà chưa được lấy thì gói hàng sinh ra sau cũng không được lấy.
+    // Giả sử gói hàng A được chỉ định cho autoBot a, gói hàng B được chỉ định cho autoBot b.
+    // Giả sử gói A được sinh ra trước gói B thì kể cả khi b đến nhận hàng trước a thì cũng không được lấy hàng.
+
+
     // Methods
-    private void makeTask(Network net, double timeNow){
+    public void Running(Network net, double timeNow, int numGateOut){
         if (this.getType().equals("In")){
             if (timeNow > getMakeTaskTime()){
-                Task nt = new Task(net.getTaskID(), timeNow);
+                Task nt = new Task(net.getTaskID(), timeNow, numGateOut); // nt: new task
                 net.insertArrivalTaskQueue(nt);
+                setTaskInterval();
             }
+        }
+        if (this.getType().equals("Out")){
+            // Count task out;
+            // Print to file: TimeNow - ID
         }
     }
 }

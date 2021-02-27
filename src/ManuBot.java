@@ -70,10 +70,17 @@ public class ManuBot { // Manufacture robot
 
     }
 
-    public void running(Network net){
+
+    public void Running(Network net, double cycleTime){
         while (this.isFunctional()){
             if (this.isDanger()){
                 GoCharge(net);
+            }
+            else{
+                for (Task ts: this.workList){
+                    //update vi tri Sx = Sx + vx*t
+                    //Update vi tri Sy = Sy + vy*t
+                }
             }
         }
     }
@@ -97,4 +104,6 @@ public class ManuBot { // Manufacture robot
     public double getChargeTime(){
         return 0;
     }
+
+
 }

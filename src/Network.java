@@ -11,6 +11,8 @@ public class Network {
     private String Gate_ycord_in = Config.getInstance().getAsString("Gate_ycord_in");
     private String Gate_xcord_out = Config.getInstance().getAsString("Gate_xcord_out");
     private String Gate_ycord_out = Config.getInstance().getAsString("Gate_ycord_out");
+    public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
+    public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
 
     // Objects section
     private List<TaskShelf> ShelfList = new ArrayList<>();
@@ -19,8 +21,8 @@ public class Network {
     private List<Gate> GateOutList = new ArrayList<>();
 
     //  Queues section
-    private List<Task> ArrivalTaskQueue = new ArrayList<>();
-    private List<Task> ActiveTaskQueue = new ArrayList<>();
+    private List<Task> ArrivalTaskQueue = new ArrayList<>(); // Queue Sinh
+    private List<Task> ActiveTaskQueue = new ArrayList<>();  // Queue Yeu cau
 
     // Objects interact section
     public void insertShelfList(TaskShelf ts){
@@ -84,6 +86,11 @@ public class Network {
         return this.numTaskTotal;
     }
 
+    // function choose the autoBot to get the new arrival task
+    public int getAutoBot_InGate(){
+        return 0;
+    }
+
     // Constructor
     public Network(){
         // Initialize gates
@@ -91,11 +98,13 @@ public class Network {
         String[] GateInY = Gate_ycord_in.split(";");
         String[] GateOutX = Gate_xcord_out.split(";");
         String[] GateOutY = Gate_ycord_out.split(";");
+
         for (int i = 0; i < GateInX.length; i++){
             point X = new point(Double.parseDouble(GateInX[i]), Double.parseDouble(GateInY[i]));
             Gate gt = new Gate(X, "In");
             insertGateInList(gt);
         }
+
         for (int i =0; i < GateOutX.length; i++){
             point X = new point(Double.parseDouble(GateOutX[i]), Double.parseDouble(GateOutY[i]));
             Gate gt = new Gate(X, "Out");
@@ -118,5 +127,37 @@ public class Network {
 
     }
 
+    public void main(String[] args) {
+        Network net = new Network();
+        double timeNow = 0;
+        while (timeNow < Sim_time){
+            // Run gate
+            for( Gate gts: this.GateInList ){
+                gts.Running(net, timeNow, net.GateOutList.size());
+            }
+            // For each task in Queue sinh, assign to autobots
+            for ( Task tks: this.ArrivalTaskQueue ){
+                int AutoBotID = getAutoBot_InGate();
+                ManuBot mb = this.ManuList.get(AutoBotID);
+                mb.workList.add(tks);
+            }
+            // Running autoBot in amount of time equals cycle time
+            for ( ManuBot mb: this.ManuList ) {
+                mb.Running(net, Cyc_time);
+            }
+            // Activate task shelves
+            for ( TaskShelf tsh: this.ShelfList){
+                tsh.Running();
+            }
+            // For each task in Queue yeu cau, assign to autobots
+            for ( Task tks: this.ActiveTaskQueue ){
+                int AutoBotID = getAutoBot_InGate();
+                ManuBot mb = this.ManuList.get(AutoBotID);
+                mb.workList.add(tks);
+            }
+            this.ActiveTaskQueue.clear();
+            this.ArrivalTaskQueue.clear();
+        }
+    }
 
 }
