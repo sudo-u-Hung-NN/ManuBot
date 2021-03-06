@@ -14,6 +14,8 @@ public class ManuBot { // Manufacture robot
     private double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
     public List<Task> workList = new LinkedList<Task>(); // List of works
     public List<point> pathPointList = new LinkedList<point>(); // List of points indicate path trajectories
+    private boolean isCharging = false;
+    public int isTransporting = -1; // 1 if carring task and -1 if not
 
     // ************************************************************************************
     // Robot methods SECTION
@@ -35,7 +37,7 @@ public class ManuBot { // Manufacture robot
     public point getLocationNow(){return this.locationNow;}
 
     // return TRUE if the robot is assigned for work
-    public boolean isOccupied() {
+    public boolean isRelax() {
         return this.workList.isEmpty();
     }
 
@@ -74,14 +76,21 @@ public class ManuBot { // Manufacture robot
                 and the AutoBot move towards the destination for durationT (s)
                 => update the current location after the formula of velocity
      */
-    public void moving(double durationTime){
+    public void moving(double durationTime, Network net){ // duration input is cycleTime GS = 1s
         point nextJoint = this.pathPointList.get(0);
         point locationNow = getLocationNow();
-        double timeRequire = locationNow.getLength(nextJoint)/getSpeed();
+        double timeRequire = locationNow.getLength(nextJoint)/getSpeed(); // 0.2 => 0.8s
         if (timeRequire < durationTime){
             setLocationNow(nextJoint);
+            for (Charger chgr: net.ChargerList){
+                if (nextJoint.getX() == chgr.getLocation().getX() && nextJoint.getY() == chgr.getLocation().getY()){
+                    this.isTransporting *= (-1);
+                    break;
+                }
+            }
+            this.isTransporting *= (-1);
             this.pathPointList.remove(0);
-            moving(durationTime - timeRequire);
+            moving(durationTime - timeRequire, net);
         }
         else {
             if (locationNow.getX() == nextJoint.getX()){ // moving vertically
@@ -102,22 +111,22 @@ public class ManuBot { // Manufacture robot
     }
 
     private void energySimulation(double cylceTime){
-        if (this.isOccupied()){
+        if (this.isRelax()){
             setResEnergy(getResEnergy() - cylceTime*this.ERperSec);
         }
-        setResEnergy(getResEnergy() - cylceTime*this.EWperSec);
+        else {
+            setResEnergy(getResEnergy() - cylceTime*this.EWperSec);
+        }
     }
 
     public void Running(Network net, double cycleTime){
-        while (this.isFunctional()){
-            if (this.isDanger()){
-                GoCharge(net);
+        if (this.isFunctional()){
+            if (!this.workList.isEmpty()){
+                this.pathPointList.add(this.workList.get(0).getLocationNow());
             }
-            else{
-                for (Task ts: this.workList){
-                    moving(cycleTime);
+            moving(cycleTime, net);
+            if (this.isDanger()){
 
-                }
             }
             energySimulation(cycleTime);
         }
@@ -135,16 +144,26 @@ public class ManuBot { // Manufacture robot
     /** @author Nguyen Nang Hung
      * @param net
      * network provide locations of charging points and their status
-     * @return the charging point
+     * @return the charger
      */
-    public point getChargingPoint(Network net) {
-        return null;
+    public Charger getCharger(Network net) {
+        double minDistance = 10000;
+        Charger output = null;
+        for (Charger chgr: net.ChargerList){
+            double dist = chgr.getLocation().getLength(getLocationNow());
+            if (dist > minDistance){
+                minDistance = dist;
+                output = chgr;
+            }
+        }
+        return output;
     }
 
     /** @author Nguyen Nang Hung
      * The AutoBot charges itself for an amount of time, this time is determined
      * as the output of this function
      * if not adaptive, charge to a constant amount of energy
+     * @using after determining the charger (run getCharger)
      * @return the duration for which the AutoBot stops at the charger
      */
     public double getChargeTime(Charger chgr){
@@ -152,17 +171,34 @@ public class ManuBot { // Manufacture robot
             return 0;
         }
         else{
-            return this.InitEnergy * this.ChargeLevel / chgr.getECperSec();
+            return (this.InitEnergy * this.ChargeLevel - this.ResEnergy) / chgr.getECperSec();
         }
     }
 
-    public void getReCharge(double duration, double timeNow){
+    /** @author Nguyen Nang Hung
+     * 2 possibilities:
+     *      If duration > timeCycle: then update the residual energy
+     *      then waits for the next timeCycle
+     *      If duration <= timeCycle: then update the residual energy
+     *      and get back to work
+     * @param duration
+     * @param timeCycle
+     */
+    public void getReCharge(Charger chgr ,double duration, double timeCycle){
+        double time_charging = getChargeTime(chgr);
+        this.isCharging = true;
+        if (duration > timeCycle){
 
+        }
+        else{
+            setResEnergy(this.getResEnergy() + chgr.getECperSec()*(duration-timeCycle));
+            this.isCharging = false;
+        }
     }
 
-    public void GoCharge(Network net){
-        point charger_location = getChargingPoint(net);
-        //double time_charging = getChargeTime();
+    public void GoCharge(Network net, double timeNow){
+        Charger chgr = getCharger(net);
+
 
     }
 
@@ -172,7 +208,7 @@ public class ManuBot { // Manufacture robot
        and the path must not over-crossing Shelves
      *
      */
-    public void getNextPath(){
+    public void getNextPoint(){
 
     }
 
