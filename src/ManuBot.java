@@ -14,7 +14,7 @@ public class ManuBot { // Manufacture robot
     private double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
     public List<Task> workList = new LinkedList<Task>(); // List of works
     public List<point> pathPointList = new LinkedList<point>(); // List of points indicate path trajectories
-    private boolean isCharging = false;
+    private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
 
     // ************************************************************************************
@@ -35,11 +35,6 @@ public class ManuBot { // Manufacture robot
     }
 
     public point getLocationNow(){return this.locationNow;}
-
-    // return TRUE if the robot is assigned for work
-    public boolean isRelax() {
-        return this.workList.isEmpty();
-    }
 
     // Return : True - The robot is at dangerous stage
     public boolean isDanger() {
@@ -77,13 +72,13 @@ public class ManuBot { // Manufacture robot
                 => update the current location after the formula of velocity
      */
     public void moving(double durationTime, Network net){ // duration input is cycleTime GS = 1s
-        point nextJoint = this.pathPointList.get(0);
+        point nextPoint = this.pathPointList.get(0);
         point locationNow = getLocationNow();
-        double timeRequire = locationNow.getLength(nextJoint)/getSpeed(); // 0.2 => 0.8s
+        double timeRequire = locationNow.getLength(nextPoint)/getSpeed(); // 0.2 => 0.8s
         if (timeRequire < durationTime){
-            setLocationNow(nextJoint);
+            setLocationNow(nextPoint);
             for (Charger chgr: net.ChargerList){
-                if (nextJoint.getX() == chgr.getLocation().getX() && nextJoint.getY() == chgr.getLocation().getY()){
+                if (nextPoint.getX() == chgr.getLocation().getX() && nextPoint.getY() == chgr.getLocation().getY()){
                     this.isTransporting *= (-1);
                     break;
                 }
@@ -93,16 +88,16 @@ public class ManuBot { // Manufacture robot
             moving(durationTime - timeRequire, net);
         }
         else {
-            if (locationNow.getX() == nextJoint.getX()){ // moving vertically
+            if (locationNow.getX() == nextPoint.getX()){ // moving vertically
                 double newX = locationNow.getX();
-                double directionVector = nextJoint.getY() - locationNow.getY();
+                double directionVector = nextPoint.getY() - locationNow.getY();
                 double newY = locationNow.getY() + durationTime/timeRequire * directionVector;
                 point locationNew = new point(newX, newY);
                 setLocationNow(locationNew);
             }
             else{ // moving horizontally
                 double newY = locationNow.getY();
-                double directionVector = nextJoint.getX() - locationNow.getX();
+                double directionVector = nextPoint.getX() - locationNow.getX();
                 double newX = locationNow.getX() + durationTime/timeRequire * directionVector;
                 point locationNew = new point(newX, newY);
                 setLocationNow(locationNew);
@@ -111,7 +106,7 @@ public class ManuBot { // Manufacture robot
     }
 
     private void energySimulation(double cylceTime){
-        if (this.isRelax()){
+        if (this.isTransporting == -1){
             setResEnergy(getResEnergy() - cylceTime*this.ERperSec);
         }
         else {
@@ -119,14 +114,22 @@ public class ManuBot { // Manufacture robot
         }
     }
 
+    public Double ECperSec = 0.0;
     public void Running(Network net, double cycleTime){
         if (this.isFunctional()){
-            if (!this.workList.isEmpty()){
-                this.pathPointList.add(this.workList.get(0).getLocationNow());
+            if (this.chargingTimeLeft == 0){
+                if (!this.workList.isEmpty()){
+                    Task firstTask = this.workList.get(0);
+                    List <point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow());
+                    this.pathPointList.addAll(toDest);
+                }
+                moving(cycleTime, net);
+                if (this.isDanger()){
+                    ECperSec = GoCharge(net); // set charging time > 0, return energy charging per second
+                }
             }
-            moving(cycleTime, net);
-            if (this.isDanger()){
-
+            else {
+                getReCharge(ECperSec, cycleTime);
             }
             energySimulation(cycleTime);
         }
@@ -177,38 +180,58 @@ public class ManuBot { // Manufacture robot
 
     /** @author Nguyen Nang Hung
      * 2 possibilities:
-     *      If duration > timeCycle: then update the residual energy
-     *      then waits for the next timeCycle
-     *      If duration <= timeCycle: then update the residual energy
-     *      and get back to work
-     * @param duration
+     *      If chargingTimeLeft > timeCycle: then update the residual energy
+     *      then waits for the next timeCycle, chargingTimeLeft get reduced
+     *      If chargingTimeLeft <= timeCycle: then update the residual energy
+     *      and set chargingTimeLeft to zero
      * @param timeCycle
      */
-    public void getReCharge(Charger chgr ,double duration, double timeCycle){
-        double time_charging = getChargeTime(chgr);
-        this.isCharging = true;
-        if (duration > timeCycle){
-
+    public void getReCharge(double ECperSec, double timeCycle){
+        if (this.chargingTimeLeft > timeCycle){
+            // stand still
+            this.chargingTimeLeft -= timeCycle;
         }
         else{
-            setResEnergy(this.getResEnergy() + chgr.getECperSec()*(duration-timeCycle));
-            this.isCharging = false;
+            setResEnergy(this.getResEnergy() + ECperSec*(this.chargingTimeLeft-timeCycle));
+            this.chargingTimeLeft = 0;
         }
-    }
-
-    public void GoCharge(Network net, double timeNow){
-        Charger chgr = getCharger(net);
-
-
     }
 
     /** @author Nguyen Nang Hung
-     * @using to determine the next joint point leading to the destination, add this point to pathPointList
+     * This function determine charging point, then insert path to that charger
+     * @param net
+     * @return charging energy per second of the chosen charger
+     */
+    public double GoCharge(Network net){
+        // choose charger location
+        Charger chgr = getCharger(net);
+        // Find path to charging point
+        List<point> toCharger = getPath(this.getLocationNow(), chgr.getLocation());
+        // Insert the path to the head of the path point list
+        this.pathPointList.addAll(0, toCharger);
+        // Determine charging time
+        this.chargingTimeLeft = getChargeTime(chgr);
+        return chgr.getECperSec();
+    }
+
+    /** @author Nguyen Nang Hung
+     * @using to determine the list of points leading to the destination, add these points to pathPointList
      * @rule path MUST BE lines that are either vertically or horizontally aligned
        and the path must not over-crossing Shelves
-     *
+     * @param StartPoint - The start point
+     * @param EndPoint - The end point
+     * @return List of point leads from StartPoint to EndPoint
      */
-    public void getNextPoint(){
+    public List<point> getPath(point StartPoint, point EndPoint){
+        List<point> toDest = new LinkedList<>();
+        // Determine points then insert into toDest list
+        DHCA(toDest, 5);
+        // Return toDest
+        return toDest;
+    }
+
+    // points determing Algorithm DHCA
+    public void DHCA(List<point> outList, int breakPoint){
 
     }
 
