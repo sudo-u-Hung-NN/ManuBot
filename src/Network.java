@@ -162,10 +162,22 @@ public class Network {
             for ( ManuBot mb: this.ManuList ) {
                 mb.Running(net, Cyc_time);
             }
+
             // Activate task shelves
             for ( TaskShelf tsh: this.ShelfList){
-                tsh.Running();
+                for (ManuBot mb: this.ManuList){
+                    if (mb.getLocationNow() == tsh.getLocation()){
+                        if (mb.isTransporting == 1) {
+                            tsh.insertShelf(mb.workList.get(0));
+                            mb.workList.remove(0);
+                        }
+                        if (mb.isTransporting == -1) {
+                            mb.workList.add(0, tsh.getTask());
+                        }
+                    }
+                }
             }
+
             // For each task in Queue yeu cau, assign to autobots
             for ( Task tks: this.ActiveTaskQueue ){
                 int AutoBotID = getAutoBot_InGate();
