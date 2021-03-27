@@ -26,7 +26,9 @@ public class ManuBot { // Manufacture robot
         this.ID = ID;
     }
 
-    public double getSpeed() {return this.speed;}
+    public double getSpeed() {
+    	return this.speed;
+    }
 
     public void setLocationNow(point LocationNow){
         this.locationNow = LocationNow;

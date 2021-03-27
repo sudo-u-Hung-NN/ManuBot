@@ -15,11 +15,11 @@ public class TaskShelf {
 
     public void setLocation(point location) {this.location = location; }
 
-    public void insertShelf(Task t){
+    public void insertShelf(Task t){ 
         this.TaskList.add(t);
     }
 
-    public Task getTask(){
+    public Task getTask(){ //
         Task t = this.TaskList.get(0);
         this.TaskList.remove(0);
         return t;
@@ -30,7 +30,7 @@ public class TaskShelf {
     }
 
     public void requestTaking(Network net){
-
+    	
     }
 
 

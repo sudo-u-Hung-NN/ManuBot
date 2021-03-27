@@ -29,7 +29,7 @@ public class point {
         return sqrt( pow(this.getX() - X.getX(), 2) + pow(this.getY() - X.getY(), 2));
     }
 
-    // Constructor
+    // Constructor: khởi tạo tọa độ 
     public point(double x, double y){
         setX(x);
         setY(y);
