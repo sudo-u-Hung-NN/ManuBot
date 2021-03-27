@@ -1,16 +1,24 @@
-import sun.nio.ch.Net;
-
 import java.util.Random;
 
 public class Task {
     private int ID;
     private double activateTime;
     private int gateOutID;
+    private point locationNow;
     private int numGateOut;
     private String rangeRandom = Config.getInstance().getAsString("Task_active_range");
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
+    public point shelfLocation = null;
+
+    public void setLocationNow(point locationNow) {
+        this.locationNow = locationNow;
+    }
+
+    public point getLocationNow() {
+        return locationNow;
+    }
 
     public double getLowerBound() {
         return lowerBound;

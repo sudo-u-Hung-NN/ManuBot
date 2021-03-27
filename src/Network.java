@@ -11,6 +11,8 @@ public class Network {
     private String Gate_ycord_in = Config.getInstance().getAsString("Gate_ycord_in");
     private String Gate_xcord_out = Config.getInstance().getAsString("Gate_xcord_out");
     private String Gate_ycord_out = Config.getInstance().getAsString("Gate_ycord_out");
+    private String Charger_xcord = Config.getInstance().getAsString("Charger_xcord");
+    private String Charger_ycord = Config.getInstance().getAsString("Charger_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
 
@@ -19,12 +21,15 @@ public class Network {
     private List<ManuBot> ManuList = new ArrayList<>();
     private List<Gate> GateInList = new ArrayList<>();
     private List<Gate> GateOutList = new ArrayList<>();
+    public List<Charger> ChargerList = new ArrayList<>();
 
     //  Queues section
     private List<Task> ArrivalTaskQueue = new ArrayList<>(); // Queue Sinh
     private List<Task> ActiveTaskQueue = new ArrayList<>();  // Queue Yeu cau
 
     // Objects interact section
+    public void insertChargerList(Charger chgr) {this.ChargerList.add(chgr);}
+
     public void insertShelfList(TaskShelf ts){
         this.ShelfList.add(ts);
     }
@@ -98,17 +103,23 @@ public class Network {
         String[] GateInY = Gate_ycord_in.split(";");
         String[] GateOutX = Gate_xcord_out.split(";");
         String[] GateOutY = Gate_ycord_out.split(";");
-
         for (int i = 0; i < GateInX.length; i++){
             point X = new point(Double.parseDouble(GateInX[i]), Double.parseDouble(GateInY[i]));
             Gate gt = new Gate(X, "In");
             insertGateInList(gt);
         }
-
         for (int i =0; i < GateOutX.length; i++){
             point X = new point(Double.parseDouble(GateOutX[i]), Double.parseDouble(GateOutY[i]));
             Gate gt = new Gate(X, "Out");
             insertGateOutList(gt);
+        }
+
+        // Initialize Charger
+        String[] ChargerX = Charger_xcord.split(";");
+        String[] ChargerY = Charger_ycord.split(";");
+        for (int i=0; i < ChargerX.length; i++){
+            Charger chgr = new Charger(i, new point(Double.parseDouble(ChargerX[i]), Double.parseDouble(ChargerY[i])));
+            insertChargerList(chgr);
         }
 
         // Initialize shelves and setting ids
@@ -119,7 +130,7 @@ public class Network {
 
         // Initialize autoBots and setting ids
         for (int j = 0; j < this.numManubot; j++){
-            ManuBot mb = new ManuBot(j);
+            ManuBot mb = new ManuBot(j, new point(0,0));
             insertManuList(mb);
         }
 
@@ -139,21 +150,40 @@ public class Network {
             for ( Task tks: this.ArrivalTaskQueue ){
                 int AutoBotID = getAutoBot_InGate();
                 ManuBot mb = this.ManuList.get(AutoBotID);
+                for (TaskShelf tsh: this.ShelfList){
+                    if(!tsh.isFull()){
+                        tks.shelfLocation = tsh.getLocation();
+                        break;
+                    }
+                }
                 mb.workList.add(tks);
             }
             // Running autoBot in amount of time equals cycle time
             for ( ManuBot mb: this.ManuList ) {
                 mb.Running(net, Cyc_time);
             }
+
             // Activate task shelves
             for ( TaskShelf tsh: this.ShelfList){
-                tsh.Running();
+                for (ManuBot mb: this.ManuList){
+                    if (mb.getLocationNow() == tsh.getLocation()){
+                        if (mb.isTransporting == 1) {
+                            tsh.insertShelf(mb.workList.get(0));
+                            mb.workList.remove(0);
+                        }
+                        if (mb.isTransporting == -1) {
+                            mb.workList.add(0, tsh.getTask());
+                        }
+                    }
+                }
             }
+
             // For each task in Queue yeu cau, assign to autobots
             for ( Task tks: this.ActiveTaskQueue ){
                 int AutoBotID = getAutoBot_InGate();
                 ManuBot mb = this.ManuList.get(AutoBotID);
-                mb.workList.add(tks);
+                mb.pathPointList.add(tks.getLocationNow());
+                mb.pathPointList.add(net.GateOutList.get(tks.getGateOut()).getLocation());
             }
             this.ActiveTaskQueue.clear();
             this.ArrivalTaskQueue.clear();

@@ -29,6 +29,8 @@ public class TaskShelf {
         return TaskList.isEmpty();
     }
 
+    public boolean isFull(){return TaskList.size() == capacityMax;}
+
     public void requestTaking(Network net){
     	
     }

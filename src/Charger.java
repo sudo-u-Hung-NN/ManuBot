@@ -3,7 +3,6 @@ public class Charger {
     private point location;
     private double ECperSec = Config.getInstance().getAsDouble("ECperSec");
     public boolean isOccupied = false;
-    public double Randm = Config.getInstance().getAsDouble("Abc");
 
     public int getID() {
         return ID;
