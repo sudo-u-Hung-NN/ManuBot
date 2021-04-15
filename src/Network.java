@@ -16,12 +16,38 @@ public class Network {
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
 
+    private double AverageWattage = 0;
+    public void setAverageWattage(double averageWattage) {
+        AverageWattage = averageWattage;
+    }
+
+    public double getAverageWattage() {
+        return AverageWattage;
+    }
+
     // Objects section
     private List<TaskShelf> ShelfList = new ArrayList<>();
     private List<ManuBot> ManuList = new ArrayList<>();
     private List<Gate> GateInList = new ArrayList<>();
     private List<Gate> GateOutList = new ArrayList<>();
     public List<Charger> ChargerList = new ArrayList<>();
+
+    // Get list
+    public List<Gate> getGateInList() {
+        return GateInList;
+    }
+
+    public List<Gate> getGateOutList() {
+        return GateOutList;
+    }
+
+    public List<TaskShelf> getShelfList() {
+        return ShelfList;
+    }
+
+    public List<ManuBot> getManuList() {
+        return ManuList;
+    }
 
     //  Queues section
     private List<Task> ArrivalTaskQueue = new ArrayList<>(); // Queue Sinh
