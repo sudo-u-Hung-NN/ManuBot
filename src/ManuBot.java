@@ -55,6 +55,10 @@ public class ManuBot { // Manufacture robot
         return ResEnergy;
     }
 
+    public double getChargingTimeLeft() {
+        return chargingTimeLeft;
+    }
+
     //
     /** @author Nguyen Nang Hung
      * @using to move AutoBot for 'durationTime' seconds
