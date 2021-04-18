@@ -33,6 +33,16 @@ public class Network {
     public List<Charger> ChargerList = new ArrayList<>();
 
     // Get list
+    public List<ManuBot> getChargingList(){
+        List<ManuBot> chargeList = new ArrayList<>();
+        for (ManuBot mb: this.ManuList){
+            if (mb.getChargingTimeLeft() > 0){
+                chargeList.add(mb);
+            }
+        }
+        return chargeList;
+    }
+
     public List<Gate> getGateInList() {
         return GateInList;
     }

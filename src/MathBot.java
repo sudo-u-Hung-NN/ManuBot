@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class ultilities {
+public class MathBot {
     /**
      * @author Nguyen Nang Hung
      * @return average length from a gate_in to a shelf
@@ -69,7 +69,7 @@ public class ultilities {
      * @return average work trip length:
      * including: ES1: take tasks from gate_in to a shelf, ES2: take tasks from shelf to gate_out
      */
-    public double AverageWorkTrip(Network net){
+    private double AverageWorkTrip(Network net){
         double ES1 = (0.5 * (AverageLength_GiTGo(net.getGateInList(), net.getGateOutList())
                 + AverageLength_GiTS(net.getGateInList(), net.getShelfList()))
                 + AverageLength_GiTS(net.getGateInList(), net.getShelfList()));
@@ -85,12 +85,17 @@ public class ultilities {
      * @author Nguyen Nang Hung
      * @return average time an autoBot finish one task
      */
-    public double AverageTimeTrip(Network net){
+    private double AverageTimeTrip(Network net){
         return  1.302/net.getManuList().get(0).getSpeed() * AverageWorkTrip(net);
     }
 
 
-    public double AverageWattage(Network net){
+    /**
+     * @author Nguyen Nang Hung
+     * @param net
+     * @return average wattage P_tb
+     */
+    private double AverageWattage(Network net){
         double ESW = AverageLength_STGo(net.getShelfList(), net.getGateOutList()) +
                 AverageLength_GiTS(net.getGateInList(), net.getShelfList());
         
@@ -106,7 +111,7 @@ public class ultilities {
      * @author Nguyen Nang Hung
      * @return avergae energy of the net right now
      */
-    public double AverageEnergy(Network network){
+    private double AverageEnergy(Network network){
         double S = 0;
         List<ManuBot> manulist = network.getManuList();
         if (manulist.isEmpty()) return 0;
@@ -116,7 +121,7 @@ public class ultilities {
         return S/manulist.size();
     }
 
-    public double AverageChargingTimeLeft(Network network){
+    private double AverageChargingTimeLeft(Network network){
         double t = 0;
         List<ManuBot> manulist = network.getManuList();
         if (manulist.isEmpty()) return 0;
@@ -130,7 +135,7 @@ public class ultilities {
      * @author Nguyen Nang Hung
      * @return the change in average energy of a network
      */
-    public double DeltaEnergy(Network net, double mu, int k){
+    private double DeltaAverageEnergy(Network net, double mu, int k){
         double EC = net.ChargerList.get(0).getECperSec();
         int NA = net.getManuList().size();
         if (NA == 0){
@@ -146,7 +151,7 @@ public class ultilities {
      * @author Nguyen Nang Hung
      * @return the change in standard deviation of a network
      */
-    public double DeltaSigmaEnergy(){
+    private double DeltaSigmaEnergy(){
         return 0;
     }
 
@@ -154,7 +159,7 @@ public class ultilities {
      * @author Nguyen Nang Hung
      * ultilities for computing Delta sigma energy
      */
-    private double Qk(){
+    private double Qk(List<MathBot> ChargingAutoBot, Network network){
         return  0;
     }
 
@@ -164,5 +169,19 @@ public class ultilities {
 
     private double Uk(){
         return 0;
+    }
+
+    /**
+     * @author Nguyen Nang Hung
+     * @param net
+     * @return F(n, k)
+     */
+    private double TaskDoneRate(Network net){
+        int k = net.getChargingList().size();
+        return (net.getManuList().size() - k)/AverageTimeTrip(net);
+    }
+    
+    public MathBot(){
+        
     }
 }
