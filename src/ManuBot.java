@@ -38,6 +38,14 @@ public class ManuBot { // Manufacture robot
 
     public point getLocationNow(){return this.locationNow;}
 
+    public double getEWperSec() {
+        return EWperSec;
+    }
+
+    public double getERperSec() {
+        return ERperSec;
+    }
+
     // Return : True - The robot is at dangerous stage
     public boolean isDanger() {
         return this.ResEnergy > this.ThshEnergy;
@@ -55,6 +63,10 @@ public class ManuBot { // Manufacture robot
 
     public Double getResEnergy() {
         return ResEnergy;
+    }
+
+    public double getChargingTimeLeft() {
+        return chargingTimeLeft;
     }
 
     //
