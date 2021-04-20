@@ -9,7 +9,6 @@ public class Node {
 	private double H;
 	private double G;
 	private double F;
-	private Node cameFrom;
 	public Node(point location) {
 		this.location = location;
 	}
@@ -64,13 +63,6 @@ public class Node {
 	}
 	public void setF(double f) {
 		F = f;
-	}
-	public Node getCameFrom() {
-		return cameFrom;
-	}
-	public void setCameFrom(Node cameFrom) {
-		this.cameFrom = cameFrom;
-		
 	}
 
 	public boolean isObstace() {

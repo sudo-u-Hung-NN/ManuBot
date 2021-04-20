@@ -42,8 +42,9 @@ public class TaskShelf {
     }
 
     // Constructor
-    public TaskShelf(int ID){
+    public TaskShelf(int ID,point location){
         setID(ID);
+        setLocation(location)
     }
 
 }
