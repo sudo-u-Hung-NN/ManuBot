@@ -160,7 +160,7 @@ public class Network {
             if (mb.getResEnergy() >= (estimateTimeG)*mb.getERperSec()){
                 if (mb.getChargingTimeLeft() == 0){
                     if (minEstimateTime1 < estimateTimeG){
-                        chooseID2 = mb.getId();
+                        chooseID1 = mb.getId();
                         minEstimateTime1 = estimateTimeG;
                     }
                 }
