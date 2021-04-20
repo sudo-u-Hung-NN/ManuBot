@@ -144,29 +144,29 @@ public class Network {
         for(ManuBot mb: this.ManuList) {
             if (mb.isTransporting == 1)
                 continue;
-            double lengthTG = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
-            double lengthGTS = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
-            double estimateTimeG = lengthTG / mb.getSpeed();                             // estimate time to Gate
-            double estimateTimeS = lengthGTS / mb.getSpeed();
-            if (mb.getResEnergy() >= (estimateTimeG + estimateTimeS) * mb.getERperSec()) {           // Manubot can take task and complete mission
+            double lengthTX = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
+            double lengthXTY = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
+            double estimateTimeX = lengthTX / mb.getSpeed();                             // estimate time to Gate
+            double estimateTimeY = lengthXTY / mb.getSpeed();
+            if (mb.getResEnergy() >= (estimateTimeX + estimateTimeY) * mb.getERperSec()) {           // Manubot can take task and complete mission
                 if (mb.getChargingTimeLeft() == 0){
                     return mb.getId();
                 }
-                if (minEstimateTime2 > estimateTimeG + estimateTimeS) {
+                if (minEstimateTime2 > estimateTimeX + estimateTimeY) {
                     chooseID2 = mb.getId();
-                    minEstimateTime2 = estimateTimeG + estimateTimeS;
+                    minEstimateTime2 = estimateTimeX + estimateTimeY;
                 }
             }
-            if (mb.getResEnergy() >= (estimateTimeG)*mb.getERperSec()){
+            if (mb.getResEnergy() >= (estimateTimeX)*mb.getERperSec()){
                 if (mb.getChargingTimeLeft() == 0){
-                    if (minEstimateTime1 < estimateTimeG){
+                    if (minEstimateTime1 < estimateTimeX){
                         chooseID1 = mb.getId();
-                        minEstimateTime1 = estimateTimeG;
+                        minEstimateTime1 = estimateTimeX;
                     }
                 }
-                else if (minEstimateTime3 > estimateTimeG) {
+                else if (minEstimateTime3 > estimateTimeX) {
                     chooseID3 = mb.getId();
-                    minEstimateTime3 = estimateTimeG;
+                    minEstimateTime3 = estimateTimeX;
                 }
             }
         }
