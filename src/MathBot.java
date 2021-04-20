@@ -3,6 +3,15 @@ import sun.nio.ch.Net;
 import java.util.List;
 
 public class MathBot {
+    // Some constant:
+    private final double P_tb;
+    private final double EC;
+    private final double AverageLength_GiTS;
+    private final double AverageLength_STGo;
+    private final double AverageLength_STS;
+    private final double AverageLength_GiTGo;
+    private final double AverageWorkTrip;
+    private final double AverageTimeTrip;
     /**
      * @author Nguyen Nang Hung
      * @return average length from a gate_in to a shelf
@@ -148,9 +157,82 @@ public class MathBot {
 
     /**
      * @author Nguyen Nang Hung
+     * @param currentEnergy: current energy of the AutoBot doing this calculation
+     * @param network: Network
+     * @return the estimate standard deviation of energy levels at the time t + mu
+     */
+    private double MuSigmaEnergy(Network network, double currentEnergy, double mu){
+        List<ManuBot> ChargingAutoBot = network.getChargingList();
+        double mu_bar = AverageChargingTimeLeft(network);
+        int NA = network.getManuList().size();
+        int k = ChargingAutoBot.size();
+        double Etb = AverageEnergy(network);
+
+        /**
+         * Computing Qk
+         */
+        double firstTerm = 0;
+        for (ManuBot mb : ChargingAutoBot){
+            firstTerm += Math.pow(mb.getResEnergy() + mu_bar * EC,2);
+        }
+        // Second term computing
+        double secondTerm = 0;
+        for (ManuBot mb: network.getManuList()){
+            if (!ChargingAutoBot.contains(mb)){
+                secondTerm += Math.pow(mb.getResEnergy(), 2);
+            }
+        }
+        // Third term computing
+        double thirdTerm = NA * Math.pow(Etb + 1.0/NA * k * mu_bar * EC, 2);
+        double Qk = firstTerm + secondTerm + thirdTerm;
+
+        /**
+         * Computing Rk
+         */
+        double Rk = (NA * Etb + k * mu_bar * EC)*(2 * P_tb - EC * 1.0/NA) - EC * currentEnergy;
+
+        /**
+         * Computing Uk
+         */
+        double Uk = (NA - 1) * Math.pow(P_tb, 2) + Math.pow(EC - P_tb, 2) - Math.pow(EC*1.0/NA - P_tb, 2);
+
+        assert Qk > 0;
+        assert Rk > 0;
+        assert Uk > 0;
+        return Math.sqrt( 1.0/NA * (Qk - 2 * mu * Rk + mu * mu * Uk));
+    }
+
+    /**
+     * @author Nguyen Nang Hung
+     * @param network
+     * @return current standard deviation of energy levels
+     */
+    private double NowSigmaEnergy(Network network){
+        int NA = network.getManuList().size();
+        double Etb = AverageEnergy(network);
+        double Sum = 0;
+        for (ManuBot mb: network.getManuList()){
+            Sum += Math.pow(mb.getResEnergy() - Etb, 2);
+        }
+        return Math.sqrt(1.0/NA * Sum);
+    }
+
+    /**
+     * @author Nguyen Nang Hung
+     * @param network: Network
+     * @param currentEnergy: check upper function
+     * @param mu: the time in the future we wish to look ahead
+     * @return the change in the standard energy deviation
+     */
+    public double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
+        return MuSigmaEnergy(network, currentEnergy, mu) - NowSigmaEnergy(network);
+    }
+
+    /**
+     * @author Nguyen Nang Hung
      * @return the change in average energy of a network
      */
-    private double DeltaAverageEnergy(Network net, double mu, int k){
+    public double DeltaAverageEnergy(Network net, double mu, int k){
         double EC = net.ChargerList.get(0).getECperSec();
         int NA = net.getManuList().size();
         if (NA == 0){
@@ -164,39 +246,57 @@ public class MathBot {
 
     /**
      * @author Nguyen Nang Hung
-     * @return the change in standard deviation of a network
-     */
-    private double DeltaSigmaEnergy(){
-        return 0;
-    }
-
-    /**
-     * @author Nguyen Nang Hung
-     * ultilities for computing Delta sigma energy
-     */
-    private double Qk(List<MathBot> ChargingAutoBot, Network network){
-        return  0;
-    }
-
-    private double Rk(){
-        return 0;
-    }
-
-    private double Uk(){
-        return 0;
-    }
-
-    /**
-     * @author Nguyen Nang Hung
      * @param net
      * @return F(n, k)
      */
-    private double TaskDoneRate(Network net){
+    public double TaskDoneRate(Network net){
         int k = net.getChargingList().size();
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
-    
-    public MathBot(){
-        
+
+    // Constructor
+    public MathBot(Network network){
+        this.P_tb = this.AverageWattage(network);
+        this.EC = network.ChargerList.get(0).getECperSec();
+        this.AverageLength_GiTGo = this.AverageLength_GiTGo(network.getGateInList(), network.getGateOutList());
+        this.AverageLength_GiTS = this.AverageLength_GiTS(network.getGateInList(), network.getShelfList());
+        this.AverageLength_STGo = this.AverageLength_STGo(network.getShelfList(), network.getGateOutList());
+        this.AverageLength_STS = this.AverageLength_STS(network.getShelfList());
+        this.AverageWorkTrip = this.AverageWorkTrip(network);
+        this.AverageTimeTrip = this.AverageTimeTrip(network);
+    }
+
+    // Getter
+
+    public double getP_tb() {
+        return P_tb;
+    }
+
+    public double getEC() {
+        return EC;
+    }
+
+    public double getAverageLength_GiTS() {
+        return AverageLength_GiTS;
+    }
+
+    public double getAverageLength_STGo() {
+        return AverageLength_STGo;
+    }
+
+    public double getAverageLength_STS() {
+        return AverageLength_STS;
+    }
+
+    public double getAverageLength_GiTGo() {
+        return AverageLength_GiTGo;
+    }
+
+    public double getAverageWorkTrip() {
+        return AverageWorkTrip;
+    }
+
+    public double getAverageTimeTrip() {
+        return AverageTimeTrip;
     }
 }
