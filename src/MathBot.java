@@ -239,7 +239,6 @@ public class MathBot {
             System.out.println("NA = 0, in DeltaEnergy function");
             System.exit(-1);
         }
-        double P_tb = net.getAverageWattage();
         double mu_bar = AverageChargingTimeLeft(net);
         return mu * (EC/NA - P_tb) + k * mu_bar * EC/NA;
     }

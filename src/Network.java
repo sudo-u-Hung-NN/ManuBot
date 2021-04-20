@@ -5,7 +5,6 @@ public class Network {
     private int numTaskTotal = 0;
     private int numShelf = Config.getInstance().getAsInteger("Shelf_quantity");
     private int numManubot = Config.getInstance().getAsInteger("ManuBot_quantity");
-    private int numCharger = Config.getInstance().getAsInteger("Charger_quantity");
     private int factorySize = Config.getInstance().getAsInteger("Factory_size");
     private String Gate_xcord_in = Config.getInstance().getAsString("Gate_xcord_in");
     private String Gate_ycord_in = Config.getInstance().getAsString("Gate_ycord_in");
@@ -17,15 +16,6 @@ public class Network {
     private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
-
-    private double AverageWattage = 0;
-    public void setAverageWattage(double averageWattage) {
-        AverageWattage = averageWattage;
-    }
-
-    public double getAverageWattage() {
-        return AverageWattage;
-    }
 
     // Objects section
     private List<TaskShelf> ShelfList = new ArrayList<>();
@@ -220,8 +210,6 @@ public class Network {
             ManuBot mb = new ManuBot(j, new point(0,0));
             insertManuList(mb);
         }
-
-        // Setting locations to shelves
 
     }
 
