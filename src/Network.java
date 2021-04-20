@@ -13,6 +13,8 @@ public class Network {
     private String Gate_ycord_out = Config.getInstance().getAsString("Gate_ycord_out");
     private String Charger_xcord = Config.getInstance().getAsString("Charger_xcord");
     private String Charger_ycord = Config.getInstance().getAsString("Charger_ycord");
+    private String Shelf_xcord = Config.getInstance().getAsString("Shelf_xcord");
+    private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
 
@@ -97,6 +99,10 @@ public class Network {
         return this.ActiveTaskQueue.isEmpty();
     }
 
+    public int getNumShelf() {
+        return numShelf;
+    }
+
     // Get task that is active by insert its ID
     public Task getActiveTask(int ID){
         for (Task i: this.ActiveTaskQueue){
@@ -128,9 +134,51 @@ public class Network {
     }
 
     // function choose the autoBot to get the new arrival task
-    public int getAutoBot_InGate(){
-        return 0;
+    public int getAutoBotFromXTY(point PointX, point PointY){
+        int chooseID1 = -1;             // The uncharged manubot can go to gate
+        int chooseID2 = -1;             // The charging manubot can complete task
+        int chooseID3 = -1;             // The charging manubot can go to gate
+        double minEstimateTime1 = 100;
+        double minEstimateTime2 = 100;
+        double minEstimateTime3 = 100;
+        for(ManuBot mb: this.ManuList) {
+            if (mb.isTransporting == 1)
+                continue;
+            double lengthTG = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
+            double lengthGTS = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
+            double estimateTimeG = lengthTG / mb.getSpeed();                             // estimate time to Gate
+            double estimateTimeS = lengthGTS / mb.getSpeed();
+            if (mb.getResEnergy() >= (estimateTimeG + estimateTimeS) * mb.getERperSec()) {           // Manubot can take task and complete mission
+                if (mb.getChargingTimeLeft() == 0){
+                    return mb.getId();
+                }
+                if (minEstimateTime2 > estimateTimeG + estimateTimeS) {
+                    chooseID2 = mb.getId();
+                    minEstimateTime2 = estimateTimeG + estimateTimeS;
+                }
+            }
+            if (mb.getResEnergy() >= (estimateTimeG)*mb.getERperSec()){
+                if (mb.getChargingTimeLeft() == 0){
+                    if (minEstimateTime1 < estimateTimeG){
+                        chooseID2 = mb.getId();
+                        minEstimateTime1 = estimateTimeG;
+                    }
+                }
+                else if (minEstimateTime3 > estimateTimeG) {
+                    chooseID3 = mb.getId();
+                    minEstimateTime3 = estimateTimeG;
+                }
+            }
+        }
+        if (chooseID1 != -1)
+            return chooseID1;
+        if (chooseID2 != -1)
+            return chooseID2;
+        if (chooseID3 != -1)
+            return chooseID3;
+        return -2;
     }
+
 
     // Constructor
     public Network(){
@@ -159,8 +207,11 @@ public class Network {
         }
 
         // Initialize shelves and setting ids
+        String[] ShelfX = Shelf_xcord.split(";");
+        String[] ShelfY = Shelf_ycord.split(";");
         for (int i = 0; i < this.numShelf; i ++){
-            TaskShelf ts = new TaskShelf(i);
+            point X = new point(Double.parseDouble(ShelfX[i]), Double.parseDouble(ShelfY[i]));
+            TaskShelf ts = new TaskShelf(i, X);
             insertShelfList(ts);
         }
 
@@ -184,14 +235,14 @@ public class Network {
             }
             // For each task in Queue sinh, assign to autobots
             for ( Task tks: this.ArrivalTaskQueue ){
-                int AutoBotID = getAutoBot_InGate();
-                ManuBot mb = this.ManuList.get(AutoBotID);
                 for (TaskShelf tsh: this.ShelfList){
                     if(!tsh.isFull()){
                         tks.shelfLocation = tsh.getLocation();
                         break;
                     }
                 }
+                int AutoBotID = getAutoBotFromXTY(tks.getLocationNow(), tks.getShelfLocation());
+                ManuBot mb = this.ManuList.get(AutoBotID);
                 mb.workList.add(tks);
             }
             // Running autoBot in amount of time equals cycle time
@@ -216,10 +267,11 @@ public class Network {
 
             // For each task in Queue yeu cau, assign to autobots
             for ( Task tks: this.ActiveTaskQueue ){
-                int AutoBotID = getAutoBot_InGate();
+                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
+                int AutoBotID = getAutoBotFromXTY(tks.getShelfLocation(), gateOutpoint);
                 ManuBot mb = this.ManuList.get(AutoBotID);
                 mb.pathPointList.add(tks.getLocationNow());
-                mb.pathPointList.add(net.GateOutList.get(tks.getGateOut()).getLocation());
+                mb.pathPointList.add(gateOutpoint);
             }
             this.ActiveTaskQueue.clear();
             this.ArrivalTaskQueue.clear();

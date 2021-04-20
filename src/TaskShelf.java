@@ -16,6 +16,7 @@ public class TaskShelf {
     public void setLocation(point location) {this.location = location; }
 
     public void insertShelf(Task t){
+        t.setLocationNow(this.getLocation());
         this.TaskList.add(t);
     }
 
@@ -35,15 +36,14 @@ public class TaskShelf {
 
     }
 
-
-
     public void Running(){
 
     }
 
     // Constructor
-    public TaskShelf(int ID){
+    public TaskShelf(int ID, point location){
         setID(ID);
+        this.location = location;
     }
 
 }

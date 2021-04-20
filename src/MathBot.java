@@ -1,3 +1,5 @@
+import sun.nio.ch.Net;
+
 import java.util.List;
 
 public class MathBot {
@@ -64,21 +66,34 @@ public class MathBot {
     }
 
     /**
+    * return: average take tasks from Gate_in to a Self trip length
+     */
+
+    private double AverageGiTSTrip(Network net){
+        return (0.5 * (AverageLength_GiTGo(net.getGateInList(), net.getGateOutList())
+                + AverageLength_GiTS(net.getGateInList(), net.getShelfList()))
+                + AverageLength_GiTS(net.getGateInList(), net.getShelfList()));
+    }
+
+    /**
+     * return: average take tasks from Self to a Gate out trip length
+     */
+
+    private double AverageSTGoTrip(Network net){
+        return ((1.0/3) * (AverageLength_STS(net.getShelfList())
+                + AverageLength_GiTS(net.getGateInList(), net.getShelfList())
+                + AverageLength_STGo(net.getShelfList(), net.getGateOutList()))
+                + AverageLength_STGo(net.getShelfList(), net.getGateOutList()));
+    }
+
+    /**
      * @author Nguyen Nang Hung
      * @param net
      * @return average work trip length:
      * including: ES1: take tasks from gate_in to a shelf, ES2: take tasks from shelf to gate_out
      */
     private double AverageWorkTrip(Network net){
-        double ES1 = (0.5 * (AverageLength_GiTGo(net.getGateInList(), net.getGateOutList())
-                + AverageLength_GiTS(net.getGateInList(), net.getShelfList()))
-                + AverageLength_GiTS(net.getGateInList(), net.getShelfList()));
-
-        double ES2 = (0.33 * (AverageLength_STS(net.getShelfList())
-                + AverageLength_GiTS(net.getGateInList(), net.getShelfList())
-                + AverageLength_STGo(net.getShelfList(), net.getGateOutList()))
-                + AverageLength_STGo(net.getShelfList(), net.getGateOutList()));
-        return ES1 + ES2;
+        return AverageGiTSTrip(net) + AverageSTGoTrip(net);
     }
 
     /**
