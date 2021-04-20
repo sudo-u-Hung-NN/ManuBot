@@ -8,7 +8,7 @@ public class ManuBot { // Manufacture robot
     private point locationNow;
     private point destination;
     private double InitEnergy = Config.getInstance().getAsDouble("init_energy");      // Energy at the start   (J)
-    private Double ResEnergy;       // Energy at the moment  (J)
+    private double ResEnergy;       // Energy at the moment  (J)
     private double ThshEnergy = Config.getInstance().getAsDouble("energy_threshold");      // Below this value is considered at dangerous stage  (J)
     private double ERperSec = Config.getInstance().getAsDouble("resting_energy");        // Energy to operate per Second at Westing stage  (J/s)
     private double EWperSec = Config.getInstance().getAsDouble("working_energy");        // Energy to operate per Second at Working state  (J/s)
@@ -147,6 +147,7 @@ public class ManuBot { // Manufacture robot
         }
     }
 
+<<<<<<< HEAD
     public Double ECperSec = 0.0;
     public void Running(Network net, Map map, double cycleTime){
         if (this.isFunctional()){
@@ -164,7 +165,29 @@ public class ManuBot { // Manufacture robot
             else {
                 getReCharge(ECperSec, cycleTime);
             }
+=======
+    public void Running(Network net, double cycleTime){
+        if (this.isFunctional()){
+//            if (this.chargingTimeLeft == 0){
+//                if (!this.workList.isEmpty()){
+//                    Task firstTask = this.workList.get(0);
+//                    List <point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow());
+//                    this.pathPointList.addAll(toDest);
+//                    System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + firstTask.getID() +"}");
+//                }
+//                moving(cycleTime, net);
+//                if (this.isDanger()){
+//                    ECperSec = GoCharge(net); // set charging time > 0, return energy charging per second
+//                }
+//            }
+//            else {
+//                getReCharge(ECperSec, cycleTime);
+//            }
+>>>>>>> db190c46b7d4d8827516e742681020d8b74eb11b
             energySimulation(cycleTime);
+//            if (this.getId() == 1){
+//                System.out.println("AutoBot id{" + this.getId() + "}, energy now :" + this.getResEnergy());
+//            }
         }
     }
 
@@ -172,6 +195,7 @@ public class ManuBot { // Manufacture robot
     public ManuBot(int ID, point Location){
         setID(ID);
         setLocationNow(Location);
+        setResEnergy(InitEnergy);
     }
 
     // Interface ends here, start modifying code under this line

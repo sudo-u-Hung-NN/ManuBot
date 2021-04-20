@@ -5,12 +5,21 @@ public class Task {
     private double activateTime;
     private int gateOutID;
     private point locationNow;
-    private int numGateOut;
     private String rangeRandom = Config.getInstance().getAsString("Task_active_range");
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
     public point shelfLocation = null;
+
+    public point getShelfLocation() {
+        return shelfLocation;
+    }
+
+//    public void setShelfLocation(Network net) {
+//        Random rand = new Random();
+//        int shelfID = rand.nextInt(net.getNumShelf());
+//        this.shelfLocation = net.getTaskShelfId(shelfID).getLocation();
+//    }
 
     public void setLocationNow(point locationNow) {
         this.locationNow = locationNow;
@@ -39,7 +48,7 @@ public class Task {
 
     public void setActivateTime(double now) {
         Random rand = new Random();
-        double deltaT = rand.nextGaussian()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
+        double deltaT = rand.nextDouble()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
         this.activateTime = now + deltaT;
     }
 
@@ -56,9 +65,11 @@ public class Task {
     }
 
     public void Activate(Network net, double timeNow){
-        if (timeNow > getActivateTime()){
+        if (timeNow >= getActivateTime()){
+            System.out.println("Task id {" + this.getID() + "} activated at time:" + timeNow);
             net.insertActiveTaskQueue(this);
         }
+        System.out.println("Passed Activate");
     }
 
     // Constructor
