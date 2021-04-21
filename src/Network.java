@@ -1,7 +1,6 @@
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Network {
@@ -234,15 +233,17 @@ public class Network {
 
     public static void main(String[] args) {
         Network net = new Network();
+        ComputingCenter brain = new ComputingCenter(net);
+        brain.printDictionary();
         double timeNow = 0;
         System.out.println(LocalDate.now() + "; " + LocalTime.now());
         System.out.println("Starting Simulation...");
-        while (timeNow < Sim_time){
-            // Run gate
+//        while (timeNow < Sim_time){
+//            // Run gate
 //            System.out.println("Time now: " + timeNow);
-            for( Gate gts: net.GateInList ){
-                gts.Running(net, timeNow, net.GateOutList.size());
-            }
+//            for( Gate gts: net.GateInList ){
+//                gts.Running(net, timeNow, net.GateOutList.size());
+//            }
 //            // For each task in Queue sinh, assign to autobots
 //            for ( Task tks: this.ArrivalTaskQueue ){
 //                for (TaskShelf tsh: this.ShelfList){
@@ -285,8 +286,8 @@ public class Network {
 //            }
 //            this.ActiveTaskQueue.clear();
 //            this.ArrivalTaskQueue.clear();
-            timeNow += Cyc_time;
-        }
+//            timeNow += Cyc_time;
+//        }
     }
 
 }

@@ -1,8 +1,8 @@
-import sun.nio.ch.Net;
 
-import java.util.List;
+import java.util.*;
+import java.util.Map;
 
-public class MathBot {
+public class ComputingCenter {
     // Some constant:
     private final double P_tb;
     private final double EC;
@@ -12,6 +12,7 @@ public class MathBot {
     private final double AverageLength_GiTGo;
     private final double AverageWorkTrip;
     private final double AverageTimeTrip;
+    private  Dictionary<String, Double> variables;
     /**
      * @author Nguyen Nang Hung
      * @return average length from a gate_in to a shelf
@@ -23,7 +24,7 @@ public class MathBot {
                 S += gt.getLocation().getLength(ts.getLocation());
             }
         }
-        S = S/(gateInList.size() * shelfList.size());
+        S = 1.302 * S/(gateInList.size() * shelfList.size());
         return S;
     }
 
@@ -38,7 +39,7 @@ public class MathBot {
                 S += ts.getLocation().getLength(gt.getLocation());
             }
         }
-        return S/(shelfList.size() * gateOutList.size());
+        return 1.302 * S/(shelfList.size() * gateOutList.size());
     }
 
     /**
@@ -48,14 +49,12 @@ public class MathBot {
      */
     private double AverageLength_STS(List<TaskShelf> shelfList){
         double S = 0.0;
-        int count = 0;
         for (TaskShelf ts1: shelfList) {
             for (TaskShelf ts2 : shelfList) {
-                count++;
                 S += ts1.getLocation().getLength(ts2.getLocation());
             }
         }
-        return S/(count*count - shelfList.size());
+        return 1.302 * S/(shelfList.size() * (shelfList.size() - 1));
     }
 
     /**
@@ -71,7 +70,7 @@ public class MathBot {
                 S += gti.getLocation().getLength(gto.getLocation());
             }
         }
-        return S/(gateInList.size() * gateOutList.size());
+        return 1.302 * S/(gateInList.size() * gateOutList.size());
     }
 
     /**
@@ -110,7 +109,9 @@ public class MathBot {
      * @return average time an autoBot finish one task
      */
     private double AverageTimeTrip(Network net){
-        return  1.302/net.getManuList().get(0).getSpeed() * AverageWorkTrip(net);
+        double v = net.getManuList().get(0).getSpeed();
+        //System.out.println("Speed = " + v);
+        return  1.0/v * AverageWorkTrip(net);
     }
 
 
@@ -253,16 +254,43 @@ public class MathBot {
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
 
+    public void printDictionary() {
+        System.out.println("Printing Computation values ...");
+        Enumeration<String> keys = this.variables.keys();
+        for (; keys.hasMoreElements();){
+            String E = keys.nextElement();
+            System.out.println(E + " = " + this.variables.get(E));
+        }
+        System.out.println("Done printing dictionary");
+    }
+
     // Constructor
-    public MathBot(Network network){
+    public ComputingCenter(Network network){
+        this.variables = new Hashtable<>();
+
         this.P_tb = this.AverageWattage(network);
+        this.variables.put("P_tb", this.P_tb);
+
         this.EC = network.ChargerList.get(0).getECperSec();
+        this.variables.put("E_C", this.EC);
+
         this.AverageLength_GiTGo = this.AverageLength_GiTGo(network.getGateInList(), network.getGateOutList());
+        this.variables.put("Average length from a Gate_in to a Gate_out", this.AverageLength_GiTGo);
+
         this.AverageLength_GiTS = this.AverageLength_GiTS(network.getGateInList(), network.getShelfList());
+        this.variables.put("Average length from a Gate_in to a Shelf", this.AverageLength_GiTS);
+
         this.AverageLength_STGo = this.AverageLength_STGo(network.getShelfList(), network.getGateOutList());
+        this.variables.put("Average length from a Shelf to a Gate_out", this.AverageLength_STGo);
+
         this.AverageLength_STS = this.AverageLength_STS(network.getShelfList());
+        this.variables.put("Average length from a shelf to another shelf", this.AverageLength_STS);
+
         this.AverageWorkTrip = this.AverageWorkTrip(network);
+        this.variables.put("Average length to finish a package/task", this.AverageWorkTrip);
+
         this.AverageTimeTrip = this.AverageTimeTrip(network);
+        this.variables.put("Average time to finish a package/task", this.AverageTimeTrip);
     }
 
     // Getter
@@ -298,4 +326,5 @@ public class MathBot {
     public double getAverageTimeTrip() {
         return AverageTimeTrip;
     }
+
 }
