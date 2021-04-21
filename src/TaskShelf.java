@@ -15,12 +15,8 @@ public class TaskShelf {
 
     public void setLocation(point location) {this.location = location; }
 
-<<<<<<< HEAD
-    public void insertShelf(Task t){ 
-=======
     public void insertShelf(Task t){
         t.setLocationNow(this.getLocation());
->>>>>>> db190c46b7d4d8827516e742681020d8b74eb11b
         this.TaskList.add(t);
     }
 
@@ -45,15 +41,8 @@ public class TaskShelf {
     }
 
     // Constructor
-<<<<<<< HEAD
     public TaskShelf(int ID,point location){
         setID(ID);
-        setLocation(location)
-=======
-    public TaskShelf(int ID, point location){
-        setID(ID);
-        this.location = location;
->>>>>>> db190c46b7d4d8827516e742681020d8b74eb11b
+        setLocation(location);
     }
-
 }

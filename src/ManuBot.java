@@ -71,56 +71,6 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    //
-    /** @author Nguyen Nang Hung
-     * @using to move AutoBot for 'durationTime' seconds
-     * @param durationTime is the time given
-     * @rule AutoBots always goes either vertically or horizontally
-     * For a given time: durationT, a given next destination:
-        => compute time needed to travel: denote as deltaT (s)
-        2 possibilities:
-         First: if deltaT < durationT:
-                Meaning: the AutoBot get to the destination and there's spare time
-                => get the next destination then recurrently recall the function(durationT - deltaT)
-         Second: if deltaT >= durationT:
-                Meaning: the AutoBot has just enough time or not enough time to reach destination
-                and the AutoBot move towards the destination for durationT (s)
-                => update the current location after the formula of velocity
-     */
-//    public void moving(double durationTime, Network net){ // duration input is cycleTime GS = 1s
-//        point nextPoint = this.pathPointList.get(0);
-//        point locationNow = getLocationNow();
-//        double timeRequire = locationNow.getLength(nextPoint)/getSpeed(); // 0.2 => 0.8s
-//        if (timeRequire < durationTime){
-//            setLocationNow(nextPoint);
-//            for (Charger chgr: net.ChargerList){
-//                if (nextPoint.getX() == chgr.getLocation().getX() && nextPoint.getY() == chgr.getLocation().getY()){
-//                    this.isTransporting *= (-1);
-//                    break;
-//                }
-//            }
-//            this.isTransporting *= (-1);
-//            this.pathPointList.remove(0);
-//            moving(durationTime - timeRequire, net);
-//        }
-//        else {
-//            if (locationNow.getX() == nextPoint.getX()){ // moving vertically
-//                double newX = locationNow.getX();
-//                double directionVector = nextPoint.getY() - locationNow.getY();
-//                double newY = locationNow.getY() + durationTime/timeRequire * directionVector;
-//                point locationNew = new point(newX, newY);
-//                setLocationNow(locationNew);
-//            }
-//            else{ // moving horizontally
-//                double newY = locationNow.getY();
-//                double directionVector = nextPoint.getX() - locationNow.getX();
-//                double newX = locationNow.getX() + durationTime/timeRequire * directionVector;
-//                point locationNew = new point(newX, newY);
-//                setLocationNow(locationNew);
-//            }
-//        }
-//    }
-    
     public void moving(Network net)
     {
     	List<point> ChargerPoint = new ArrayList<>();
@@ -147,25 +97,25 @@ public class ManuBot { // Manufacture robot
         }
     }
 
-<<<<<<< HEAD
     public Double ECperSec = 0.0;
-    public void Running(Network net, Map map, double cycleTime){
-        if (this.isFunctional()){
-            if (this.chargingTimeLeft == 0){
-                if (!this.workList.isEmpty()){
+    public void Running(Network net, Map map, double cycleTime) {
+        if (this.isFunctional()) {
+            if (this.chargingTimeLeft == 0) {
+                if (!this.workList.isEmpty()) {
                     Task firstTask = this.workList.get(0);
-                    List <point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
+                    List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
                     this.pathPointList.addAll(toDest);
                 }
                 moving(net);
-                if (this.isDanger()){
-                    ECperSec = GoCharge(net,map); // set charging time > 0, return energy charging per second
+                if (this.isDanger()) {
+                    ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
                 }
-            }
-            else {
+            } else {
                 getReCharge(ECperSec, cycleTime);
             }
-=======
+        }
+    }
+
     public void Running(Network net, double cycleTime){
         if (this.isFunctional()){
 //            if (this.chargingTimeLeft == 0){
@@ -183,7 +133,6 @@ public class ManuBot { // Manufacture robot
 //            else {
 //                getReCharge(ECperSec, cycleTime);
 //            }
->>>>>>> db190c46b7d4d8827516e742681020d8b74eb11b
             energySimulation(cycleTime);
 //            if (this.getId() == 1){
 //                System.out.println("AutoBot id{" + this.getId() + "}, energy now :" + this.getResEnergy());
@@ -271,15 +220,6 @@ public class ManuBot { // Manufacture robot
         return chgr.getECperSec();
     }
 
-    /** @author Nguyen Nang Hung
-     * @using to determine the list of points leading to the destination, add these points to pathPointList
-     * @rule path MUST BE lines that are either vertically or horizontally aligned
-       and the path must not over-crossing Shelves
-     * @param StartPoint - The start point
-     * @param EndPoint - The end point
-     * @return List of point leads from StartPoint to EndPoint
-     */
- 
     public List<point> getPath(point startPoint, point endPoint, Map map){
         List<point> toDest = new LinkedList<>();
         // Determine points then insert into toDest list

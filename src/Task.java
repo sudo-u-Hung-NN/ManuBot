@@ -78,4 +78,14 @@ public class Task {
         setActivateTime(timeNow);
         setGateOut(numGateOut);
     }
+
+    // Constructor for copy
+    public Task(int ID, int numGateOut){
+        setID(ID);
+        setGateOut(numGateOut);
+    }
+
+    public Task copy(){
+        return new Task(this.getID(), this.getGateOut());
+    }
 }

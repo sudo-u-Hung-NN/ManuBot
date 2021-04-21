@@ -1,6 +1,7 @@
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Network {
@@ -288,8 +289,13 @@ public class Network {
 //                }
 //            }
             // Running tasks in TaskList
-//            for (Task tks: net.TaskList) {
-//                tks.Activate(net, timeNow);
+//            Iterator<Task> iter = net.TaskList.iterator();
+//            while (iter.hasNext()) {
+//                if (timeNow >= iter.next().getActivateTime()){
+//                    net.insertActiveTaskQueue(iter.next().copy());
+//                    System.out.println("Task id {" + iter.next().getID() + "} activated at time:" + timeNow);
+//                    iter.remove();
+//                }
 //            }
             // For each task in Queue yeu cau, assign to autobots
 //            for (Task tks: net.ActiveTaskQueue ){
