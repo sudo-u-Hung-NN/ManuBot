@@ -43,7 +43,11 @@ public class Task {
 
     public void setGateOut(int numGateOut) {
         Random rand = new Random();
-        this.gateOutID = 1 + rand.nextInt(numGateOut);
+        this.gateOutID = rand.nextInt(numGateOut);
+    }
+
+    public void setGateOutIDCopy(int GateOutId){
+        this.gateOutID = GateOutId;
     }
 
     public void setActivateTime(double now) {
@@ -64,12 +68,8 @@ public class Task {
         return ID;
     }
 
-    public void Activate(Network net, double timeNow){
-        if (timeNow >= getActivateTime()){
-            System.out.println("Task id {" + this.getID() + "} activated at time:" + timeNow);
-            net.insertActiveTaskQueue(this);
-        }
-        System.out.println("Passed Activate");
+    public boolean isActive(double timeNow){
+        return timeNow >= getActivateTime();
     }
 
     // Constructor
@@ -82,7 +82,7 @@ public class Task {
     // Constructor for copy
     public Task(int ID, int numGateOut){
         setID(ID);
-        setGateOut(numGateOut);
+        setGateOutIDCopy(numGateOut);
     }
 
     public Task copy(){

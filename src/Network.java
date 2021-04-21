@@ -59,8 +59,8 @@ public class Network {
     }
 
     //  Queues section
-    private List<Task> ArrivalTaskQueue = new ArrayList<>(); // Queue Sinh
-    private List<Task> ActiveTaskQueue = new ArrayList<>();  // Queue Yeu cau
+    private List<Task> ArrivalTaskQueue; // Queue Sinh
+    private List<Task> ActiveTaskQueue;  // Queue Yeu cau
 
     // Objects interact section
     public void insertChargerList(Charger chgr) {this.ChargerList.add(chgr);}
@@ -79,19 +79,14 @@ public class Network {
 
     public void insertGateOutList(Gate gt){ this.GateOutList.add(gt); }
 
-    public void insertTaskList(Task tk) {this.TaskList.add(tk);}
-
-    public void removeTask(Task tk) {this.TaskList.remove(tk);}
-
     // Queues interact section
     public void insertArrivalTaskQueue(Task nt){
         this.ArrivalTaskQueue.add(nt);
-        insertTaskList(nt);
+        this.TaskList.add(nt);
     }
 
     public void insertActiveTaskQueue(Task nt){
         this.ActiveTaskQueue.add(nt);
-        insertTaskList(nt);
     }
 
     public boolean isNewTask(){
@@ -191,6 +186,10 @@ public class Network {
 
     // Constructor
     public Network(){
+        // Initialize Queues
+        this.ArrivalTaskQueue = new ArrayList<>();
+        this.ActiveTaskQueue = new ArrayList<>();
+
         // Initialize gates
         System.out.println("Initializing Gates...");
         String[] GateInX = Gate_xcord_in.split(";");
@@ -256,6 +255,7 @@ public class Network {
             for( Gate gts: net.GateInList ){
                 gts.Running(net, timeNow, net.GateOutList.size());
             }
+
             // For each task in Queue sinh, assign to autobots
             for ( Task tks: net.ArrivalTaskQueue ){
                 for (TaskShelf tsh: net.ShelfList){
@@ -264,48 +264,46 @@ public class Network {
                         break;
                     }
                 }
-//                int AutoBotID = net.getAutoBotFromXTY(tks.getLocationNow(), tks.getShelfLocation());
+                int AutoBotID = net.getAutoBotFromXTY(tks.getLocationNow(), tks.getShelfLocation());
                 ManuBot mb = net.ManuList.get(1);
                 mb.workList.add(tks);
                 System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
             }
-            // Running autoBot in amount of time equals cycle time
-            for ( ManuBot mb: net.ManuList ) {
-                mb.Running(net, Cyc_time);
+
+            // For all tasks, check if any are activated
+            {
+                Iterator<Task> iter = net.TaskList.listIterator();
+                List<Task> activeNow = new ArrayList<>();
+                while (iter.hasNext()) {
+                    Task tks = iter.next();
+                    if (tks.isActive(timeNow)) {
+                        System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
+                        Task nt = tks.copy();
+                        activeNow.add(nt);
+                        iter.remove();
+                    }
+                }
+                if (activeNow.size() > 0) {
+                    net.ActiveTaskQueue.addAll(activeNow);
+                }
+                activeNow.clear();
+
+                // Running autoBot in amount of time equals cycle time
+                for (ManuBot mb : net.ManuList) {
+                    mb.Running(net, Cyc_time);
+                }
             }
-//
-//            // Activate task shelves
-//            for ( TaskShelf tsh: this.ShelfList){
-//                for (ManuBot mb: this.ManuList){
-//                    if (mb.getLocationNow() == tsh.getLocation()){
-//                        if (mb.isTransporting == 1) {
-//                            tsh.insertShelf(mb.workList.get(0));
-//                            mb.workList.remove(0);
-//                        }
-//                        if (mb.isTransporting == -1) {
-//                            mb.workList.add(0, tsh.getTask());
-//                        }
-//                    }
-//                }
-//            }
-            // Running tasks in TaskList
-//            Iterator<Task> iter = net.TaskList.iterator();
-//            while (iter.hasNext()) {
-//                if (timeNow >= iter.next().getActivateTime()){
-//                    net.insertActiveTaskQueue(iter.next().copy());
-//                    System.out.println("Task id {" + iter.next().getID() + "} activated at time:" + timeNow);
-//                    iter.remove();
-//                }
-//            }
+
             // For each task in Queue yeu cau, assign to autobots
-//            for (Task tks: net.ActiveTaskQueue ){
-//                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
-//                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-//                int AutoBotID = net.getAutoBotFromXTY(tks.getShelfLocation(), gateOutpoint);
-//                ManuBot mb = net.ManuList.get(AutoBotID);
-//                mb.pathPointList.add(tks.getLocationNow());
-//                mb.pathPointList.add(gateOutpoint);
-//            }
+            for (Task tks: net.ActiveTaskQueue){
+                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
+                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                //int AutoBotID = net.getAutoBotFromXTY(tks.getShelfLocation(), gateOutpoint);
+                ManuBot mb = net.ManuList.get(1);
+                mb.pathPointList.add(tks.getLocationNow());
+                mb.pathPointList.add(gateOutpoint);
+            }
+
             net.ActiveTaskQueue.clear();
             net.ArrivalTaskQueue.clear();
             timeNow += Cyc_time;
