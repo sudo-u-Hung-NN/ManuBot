@@ -65,9 +65,11 @@ public class Task {
     }
 
     public void Activate(Network net, double timeNow){
-        if (timeNow > getActivateTime()){
+        if (timeNow >= getActivateTime()){
+            System.out.println("Task id {" + this.getID() + "} activated at time:" + timeNow);
             net.insertActiveTaskQueue(this);
         }
+        System.out.println("Passed Activate");
     }
 
     // Constructor

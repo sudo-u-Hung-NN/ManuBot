@@ -12,7 +12,7 @@ public class ComputingCenter {
     private final double AverageLength_GiTGo;
     private final double AverageWorkTrip;
     private final double AverageTimeTrip;
-    private  Dictionary<String, Double> variables;
+    private final Dictionary<String, Double> variables;
     /**
      * @author Nguyen Nang Hung
      * @return average length from a gate_in to a shelf

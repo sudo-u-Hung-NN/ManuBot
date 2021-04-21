@@ -74,7 +74,7 @@ public class Gate {
     // Methods
     public void Running(Network net, double timeNow, int numGateOut){
         if (this.getType().equals("In")){
-            if (timeNow > getMakeTaskTime()){
+            if (timeNow >= getMakeTaskTime()){
                 Task nt = new Task(net.getTaskID(), timeNow, numGateOut); // nt: new task
                 nt.setLocationNow(this.location);
                 net.insertArrivalTaskQueue(nt);
