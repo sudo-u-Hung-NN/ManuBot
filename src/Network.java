@@ -151,14 +151,22 @@ public class Network {
         double minEstimateTime2 = 100;
         double minEstimateTime3 = 100;
         for(ManuBot mb: this.ManuList) {
-            if (mb.isTransporting == 1)
+            if (!mb.workList.isEmpty()){
+//                System.out.println(mb.getId());
                 continue;
+            }
             double lengthTX = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
             double lengthXTY = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
             double estimateTimeX = lengthTX / mb.getSpeed();                             // estimate time to Gate
             double estimateTimeY = lengthXTY / mb.getSpeed();
+//            System.out.println("1.TX: " + lengthTX);
+//            System.out.println("XTY: " + lengthXTY);
+//            System.out.println("EX: " + estimateTimeX);
+//            System.out.println("EY: " + estimateTimeY);
+//            System.out.println(mb.getResEnergy());
+//            System.out.println(((estimateTimeX + estimateTimeY) * mb.getERperSec()));
             if (mb.getResEnergy() >= (estimateTimeX + estimateTimeY) * mb.getERperSec()) {           // Manubot can take task and complete mission
-                if (mb.getChargingTimeLeft() == 0){
+                if (mb.getChargingTimeLeft() == 0.0){
                     return mb.getId();
                 }
                 if (minEstimateTime2 > estimateTimeX + estimateTimeY) {
@@ -183,9 +191,8 @@ public class Network {
             return chooseID1;
         if (chooseID2 != -1)
             return chooseID2;
-        if (chooseID3 != -1)
-            return chooseID3;
-        return -2;
+        return chooseID3;
+
     }
 
 
