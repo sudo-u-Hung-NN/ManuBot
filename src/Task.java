@@ -48,7 +48,7 @@ public class Task {
 
     public void setActivateTime(double now) {
         Random rand = new Random();
-        double deltaT = rand.nextGaussian()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
+        double deltaT = rand.nextDouble()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
         this.activateTime = now + deltaT;
     }
 

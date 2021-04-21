@@ -1,3 +1,4 @@
+import java.time.LocalTime;
 import java.util.Random;
 
 public class Gate {
@@ -8,6 +9,15 @@ public class Gate {
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
+    private int gateID = 0;
+
+    public void setGateID(int gateID) {
+        this.gateID = gateID;
+    }
+
+    public int getGateID() {
+        return gateID;
+    }
 
     public void setType(String type) {
         this.type = type;
@@ -41,7 +51,7 @@ public class Gate {
     public void setTaskInterval() {
         try {
             Random rand = new Random();
-            double deltaT = rand.nextGaussian()*getRanging()+getLowerBound();  //deltaT from 300 to 400 (second)
+            double deltaT = rand.nextDouble()*getRanging()+getLowerBound();  //deltaT from 300 to 400 (second)
             this.makeTaskTime += deltaT;
         }
         catch (Exception e){
@@ -50,7 +60,8 @@ public class Gate {
     }
 
     // Constructor
-    public Gate(point X, String type){
+    public Gate(int ID, point X, String type){
+        setGateID(ID);
         setType(type);
         setLocation(X);
         this.makeTaskTime = 0;
@@ -68,6 +79,8 @@ public class Gate {
                 nt.setLocationNow(this.location);
                 net.insertArrivalTaskQueue(nt);
                 setTaskInterval();
+                System.out.println("Gate_in id{" + this.getGateID() + "} created package id{"
+                        + nt.getID() +"} at " + timeNow);
             }
         }
         if (this.getType().equals("Out")){
