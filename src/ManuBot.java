@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class ManuBot { // Manufacture robot
@@ -14,10 +13,11 @@ public class ManuBot { // Manufacture robot
     private double EWperSec = Config.getInstance().getAsDouble("working_energy");        // Energy to operate per Second at Working state  (J/s)
     private boolean isAdaptive = Config.getInstance().getAsBoolean("adaptive_charging");         // False if manual determining the percentage charging
     private double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
-    public List<Task> workList = new LinkedList<Task>(); // List of works
-    public List<point> pathPointList = new LinkedList<point>(); // List of points indicate path trajectories
+    public List<Task> workList = new ArrayList<>(); // List of works
+    public List<point> pathPointList = new ArrayList<>(); // List of points indicate path trajectories
     private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
+    private final List<point> switchStatePoints;
 
     // ************************************************************************************
     // Robot methods SECTION
@@ -71,16 +71,15 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving(Network net)
+    public void moving()
     {
-    	List<point> ChargerPoint = new ArrayList<>();
-    	for (Charger chgr: net.ChargerList)
-    		ChargerPoint.add(chgr.getLocation());
-    	
-    	if (ChargerPoint.contains(locationNow))
+    	if (this.getChargingTimeLeft() > 0){
+    	    return;
+        }
+    	if (this.switchStatePoints.contains(locationNow))
     	{
     		this.isTransporting *= -1;
-    		return ;
+    		return;
     	}
     	else {
     		this.locationNow = this.pathPointList.get(0);
@@ -105,46 +104,37 @@ public class ManuBot { // Manufacture robot
                     Task firstTask = this.workList.get(0);
                     List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
                     this.pathPointList.addAll(toDest);
+                    moving();
                 }
-                moving(net);
                 if (this.isDanger()) {
                     ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
                 }
             } else {
                 getReCharge(ECperSec, cycleTime);
             }
-        }
-    }
-
-    public void Running(Network net, double cycleTime){
-        if (this.isFunctional()){
-//            if (this.chargingTimeLeft == 0){
-//                if (!this.workList.isEmpty()){
-//                    Task firstTask = this.workList.get(0);
-//                    List <point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow());
-//                    this.pathPointList.addAll(toDest);
-//                    System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + firstTask.getID() +"}");
-//                }
-//                moving(cycleTime, net);
-//                if (this.isDanger()){
-//                    ECperSec = GoCharge(net); // set charging time > 0, return energy charging per second
-//                }
-//            }
-//            else {
-//                getReCharge(ECperSec, cycleTime);
-//            }
+//            System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + firstTask.getID() +"}");
             energySimulation(cycleTime);
-//            if (this.getId() == 1){
-//                System.out.println("AutoBot id{" + this.getId() + "}, energy now :" + this.getResEnergy());
-//            }
+            this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
+            assert chargingTimeLeft >= 0 :
+                    String.format("chargingTimeLeft is set false, value = %f", this.chargingTimeLeft);
         }
     }
 
     // Constructor
-    public ManuBot(int ID, point Location){
+    public ManuBot(int ID, point Location, Network network){
         setID(ID);
         setLocationNow(Location);
         setResEnergy(InitEnergy);
+        this.switchStatePoints = new ArrayList<>();
+        for (Gate gt: network.getGateInList()){
+            this.switchStatePoints.add(gt.getLocation());
+        }
+        for (Gate gt: network.getGateOutList()){
+            this.switchStatePoints.add(gt.getLocation());
+        }
+        for (TaskShelf tsh: network.getShelfList()){
+            this.switchStatePoints.add(tsh.getLocation());
+        }
     }
 
     // Interface ends here, start modifying code under this line
@@ -221,9 +211,8 @@ public class ManuBot { // Manufacture robot
     }
 
     public List<point> getPath(point startPoint, point endPoint, Map map){
-        List<point> toDest = new LinkedList<>();
+        List<point> toDest = new ArrayList<>();
         // Determine points then insert into toDest list
-        
 		Node newNode ;
 		map.setStartPoint(startPoint);
 		map.setEndPoint(endPoint);

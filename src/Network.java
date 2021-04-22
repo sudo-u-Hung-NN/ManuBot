@@ -132,66 +132,6 @@ public class Network {
         return this.numTaskTotal;
     }
 
-    /**
-     * @author Le Minh An
-     * function choose the autoBot to get the new occured task
-     * @param PointX: location of the packet
-     * @param PointY: destination of the packet
-     * @return id of the chosen autoBot
-     */
-    public int getAutoBotFromXTY(point PointX, point PointY){
-        int chooseID1 = -1;             // The uncharged manubot can go to gate
-        int chooseID2 = -1;             // The charging manubot can complete task
-        int chooseID3 = -1;             // The charging manubot can go to gate
-        double minEstimateTime1 = 100;
-        double minEstimateTime2 = 100;
-        double minEstimateTime3 = 100;
-        for(ManuBot mb: this.ManuList) {
-            if (!mb.workList.isEmpty()){
-//                System.out.println(mb.getId());
-                continue;
-            }
-            double lengthTX = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
-            double lengthXTY = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
-            double estimateTimeX = lengthTX / mb.getSpeed();                             // estimate time to Gate
-            double estimateTimeY = lengthXTY / mb.getSpeed();
-//            System.out.println("1.TX: " + lengthTX);
-//            System.out.println("XTY: " + lengthXTY);
-//            System.out.println("EX: " + estimateTimeX);
-//            System.out.println("EY: " + estimateTimeY);
-//            System.out.println(mb.getResEnergy());
-//            System.out.println(((estimateTimeX + estimateTimeY) * mb.getERperSec()));
-            if (mb.getResEnergy() >= (estimateTimeX + estimateTimeY) * mb.getERperSec()) {           // Manubot can take task and complete mission
-                if (mb.getChargingTimeLeft() == 0.0){
-                    return mb.getId();
-                }
-                if (minEstimateTime2 > estimateTimeX + estimateTimeY) {
-                    chooseID2 = mb.getId();
-                    minEstimateTime2 = estimateTimeX + estimateTimeY;
-                }
-            }
-            if (mb.getResEnergy() >= (estimateTimeX)*mb.getERperSec()){
-                if (mb.getChargingTimeLeft() == 0){
-                    if (minEstimateTime1 < estimateTimeX){
-                        chooseID1 = mb.getId();
-                        minEstimateTime1 = estimateTimeX;
-                    }
-                }
-                else if (minEstimateTime3 > estimateTimeX) {
-                    chooseID3 = mb.getId();
-                    minEstimateTime3 = estimateTimeX;
-                }
-            }
-        }
-        if (chooseID1 != -1)
-            return chooseID1;
-        if (chooseID2 != -1)
-            return chooseID2;
-        return chooseID3;
-
-    }
-
-
     // Constructor
     public Network(){
         // Initialize Queues
@@ -243,7 +183,7 @@ public class Network {
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < this.numManubot; i++){
             point X = new point(0,0);
-            ManuBot mb = new ManuBot(i, X);
+            ManuBot mb = new ManuBot(i, X, this);
             insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
@@ -253,12 +193,33 @@ public class Network {
     public static void main(String[] args) {
         Network net = new Network();
         ComputingCenter brain = new ComputingCenter(net);
-        brain.printDictionary();
+        Map map = new Map();
+
+        // Run simulator
         double timeNow = 0;
         System.out.println(LocalDate.now() + "; " + LocalTime.now());
         System.out.println("Starting Simulation...");
+
+        List<Task> taskActiveRemain = new ArrayList<>();
+        List<Task> taskArriveRemain = new ArrayList<>();
+
         while (timeNow < Sim_time){
 //            System.out.println(timeNow);
+
+            // For each task in Queue yeu cau, assign to autobots
+            for (Task tks: net.ActiveTaskQueue){
+                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
+                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOutpoint);
+                if (AutoBotID < 0){
+                    taskActiveRemain.add(tks);
+                    continue;
+                }
+                ManuBot mb = net.ManuList.get(AutoBotID);
+                mb.pathPointList.add(tks.getLocationNow());
+                mb.pathPointList.add(gateOutpoint);
+            }
+
             // Run gate
             for( Gate gts: net.GateInList ){
                 gts.Running(net, timeNow, net.GateOutList.size());
@@ -272,8 +233,12 @@ public class Network {
                         break;
                     }
                 }
-                int AutoBotID = net.getAutoBotFromXTY(tks.getLocationNow(), tks.getShelfLocation());
-                ManuBot mb = net.ManuList.get(1);
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
+                if (AutoBotID < 0){
+                    taskArriveRemain.add(tks);
+                    continue;
+                }
+                ManuBot mb = net.ManuList.get(AutoBotID);
                 mb.workList.add(tks);
                 System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
             }
@@ -298,22 +263,19 @@ public class Network {
 
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
-                    mb.Running(net, Cyc_time);
+                    mb.Running(net, map, Cyc_time);
                 }
-            }
-
-            // For each task in Queue yeu cau, assign to autobots
-            for (Task tks: net.ActiveTaskQueue){
-                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
-                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                //int AutoBotID = net.getAutoBotFromXTY(tks.getShelfLocation(), gateOutpoint);
-                ManuBot mb = net.ManuList.get(1);
-                mb.pathPointList.add(tks.getLocationNow());
-                mb.pathPointList.add(gateOutpoint);
             }
 
             net.ActiveTaskQueue.clear();
             net.ArrivalTaskQueue.clear();
+
+            net.ActiveTaskQueue.addAll(taskActiveRemain);
+            net.ArrivalTaskQueue.addAll(taskArriveRemain);
+
+            taskActiveRemain.clear();
+            taskArriveRemain.clear();
+
             timeNow += Cyc_time;
         }
     }
