@@ -182,7 +182,7 @@ public class Network {
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < this.numManubot; i++){
             point X = new point(0,0);
-            ManuBot mb = new ManuBot(i, X);
+            ManuBot mb = new ManuBot(i, X, this);
             insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
@@ -193,6 +193,7 @@ public class Network {
         Network net = new Network();
         ComputingCenter brain = new ComputingCenter(net);
         brain.printDictionary();
+        Map map = new Map();
 
         // Run simulator
         double timeNow = 0;
@@ -271,6 +272,9 @@ public class Network {
 
             net.ActiveTaskQueue.addAll(taskActiveRemain);
             net.ArrivalTaskQueue.addAll(taskArriveRemain);
+
+            taskActiveRemain.clear();
+            taskArriveRemain.clear();
 
             timeNow += Cyc_time;
         }

@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Map {
 	
-	public static final int mapSize = 2000;
+	public static final int mapSize = Config.getInstance().getAsInteger("Map_size");
 	private Node map[][] = new Node[mapSize][mapSize];
 	private Node startPoint;
 	private Node endPoint;
@@ -54,7 +54,13 @@ public class Map {
 				if (j + 1 < mapSize)
 					map[i][j].getNext().add(map[i][j+1]);
 			}
-		
+	}
+
+	public void printMapInformation(){
+		System.out.println(String.format("Map size: %d", mapSize));
+		System.out.println(String.format("Factory size: %d", factorySize));
+		System.out.println(String.format("Number of nodes: %d", mapSize*mapSize));
+//		System.out.println(String.format("Number of obstacles: %d"));
 	}
 	
 
@@ -150,7 +156,6 @@ public class Map {
 	}
 
 
-	
 	public Node pointToNode(point Point) {
 		double x = Point.getX();
 		double y = Point.getY();

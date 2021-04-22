@@ -18,6 +18,7 @@ public class ManuBot { // Manufacture robot
     public List<point> pathPointList = new LinkedList<point>(); // List of points indicate path trajectories
     private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
+    private final List<point> switchStatePoints;
 
     // ************************************************************************************
     // Robot methods SECTION
@@ -71,16 +72,15 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving(Network net)
+    public void moving()
     {
-    	List<point> ChargerPoint = new ArrayList<>();
-    	for (Charger chgr: net.ChargerList)
-    		ChargerPoint.add(chgr.getLocation());
-    	
-    	if (ChargerPoint.contains(locationNow))
+    	if (this.getChargingTimeLeft() > 0){
+    	    return;
+        }
+    	if (this.switchStatePoints.contains(locationNow))
     	{
     		this.isTransporting *= -1;
-    		return ;
+    		return;
     	}
     	else {
     		this.locationNow = this.pathPointList.get(0);
@@ -106,7 +106,7 @@ public class ManuBot { // Manufacture robot
                     List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
                     this.pathPointList.addAll(toDest);
                 }
-                moving(net);
+                moving();
                 if (this.isDanger()) {
                     ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
                 }
@@ -141,10 +141,20 @@ public class ManuBot { // Manufacture robot
     }
 
     // Constructor
-    public ManuBot(int ID, point Location){
+    public ManuBot(int ID, point Location, Network network){
         setID(ID);
         setLocationNow(Location);
         setResEnergy(InitEnergy);
+        this.switchStatePoints = new ArrayList<>();
+        for (Gate gt: network.getGateInList()){
+            this.switchStatePoints.add(gt.getLocation());
+        }
+        for (Gate gt: network.getGateOutList()){
+            this.switchStatePoints.add(gt.getLocation());
+        }
+        for (TaskShelf tsh: network.getShelfList()){
+            this.switchStatePoints.add(tsh.getLocation());
+        }
     }
 
     // Interface ends here, start modifying code under this line
