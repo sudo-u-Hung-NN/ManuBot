@@ -198,8 +198,27 @@ public class Network {
         double timeNow = 0;
         System.out.println(LocalDate.now() + "; " + LocalTime.now());
         System.out.println("Starting Simulation...");
+
+        List<Task> taskActiveRemain = new ArrayList<>();
+        List<Task> taskArriveRemain = new ArrayList<>();
+
         while (timeNow < Sim_time){
 //            System.out.println(timeNow);
+
+            // For each task in Queue yeu cau, assign to autobots
+            for (Task tks: net.ActiveTaskQueue){
+                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
+                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOutpoint);
+                if (AutoBotID < 0){
+                    taskActiveRemain.add(tks);
+                    continue;
+                }
+                ManuBot mb = net.ManuList.get(AutoBotID);
+                mb.pathPointList.add(tks.getLocationNow());
+                mb.pathPointList.add(gateOutpoint);
+            }
+
             // Run gate
             for( Gate gts: net.GateInList ){
                 gts.Running(net, timeNow, net.GateOutList.size());
@@ -214,6 +233,10 @@ public class Network {
                     }
                 }
                 int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
+                if (AutoBotID < 0){
+                    taskArriveRemain.add(tks);
+                    continue;
+                }
                 ManuBot mb = net.ManuList.get(AutoBotID);
                 mb.workList.add(tks);
                 System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
@@ -243,18 +266,12 @@ public class Network {
                 }
             }
 
-            // For each task in Queue yeu cau, assign to autobots
-            for (Task tks: net.ActiveTaskQueue){
-                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
-                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOutpoint);
-                ManuBot mb = net.ManuList.get(AutoBotID);
-                mb.pathPointList.add(tks.getLocationNow());
-                mb.pathPointList.add(gateOutpoint);
-            }
-
             net.ActiveTaskQueue.clear();
             net.ArrivalTaskQueue.clear();
+
+            net.ActiveTaskQueue.addAll(taskActiveRemain);
+            net.ArrivalTaskQueue.addAll(taskArriveRemain);
+
             timeNow += Cyc_time;
         }
     }
