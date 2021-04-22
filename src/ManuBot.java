@@ -88,12 +88,12 @@ public class ManuBot { // Manufacture robot
     	}
     }
     
-    private void energySimulation(double cylceTime){
+    private void energySimulation(double cycleTime){
         if (this.isTransporting == -1){
-            setResEnergy(getResEnergy() - cylceTime*this.ERperSec);
+            setResEnergy(getResEnergy() - cycleTime*this.ERperSec);
         }
         else {
-            setResEnergy(getResEnergy() - cylceTime*this.EWperSec);
+            setResEnergy(getResEnergy() - cycleTime*this.EWperSec);
         }
     }
 
@@ -230,7 +230,7 @@ public class ManuBot { // Manufacture robot
 		do
 		{
 			newNode = map.FindPath(toDest);
-			map.setStartPoint(newNode.getLocation());
+			map.setStartPoint(newNode);
 		} while (!newNode.equals(map.getEndPoint()));
 		System.out.println("Find path completed");
         // Return toDest
