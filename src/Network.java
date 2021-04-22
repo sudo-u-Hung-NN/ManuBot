@@ -19,6 +19,7 @@ public class Network {
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
 
+
     // Print to files section
     private final String fileDetail = Config.getInstance().getAsString("DumpDetailFile");
     private final String fileAll = Config.getInstance().getAsString("DumpOverallFile");

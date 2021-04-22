@@ -8,7 +8,7 @@ public class Map {
 	private Node map[][] = new Node[mapSize][mapSize];
 	private Node startPoint;
 	private Node endPoint;
-	private List<Node> closeList =  new ArrayList<>();;
+	private List<Node> closeList =  new ArrayList<>();
 	private String Obstacle_xcord = Config.getInstance().getAsString("Shelf_xcord");
     private String Obstacle_ycord = Config.getInstance().getAsString("Shelf_ycord");
 	private int minDistance = 0;
@@ -20,8 +20,7 @@ public class Map {
 		for (int i = 0 ; i < mapSize ; i++)
 			for (int j = 0; j < mapSize; j++)
 			{
-				point newPoint = new point(distance * i , distance * j);
-				map[i][j] = new Node(newPoint);
+				map[i][j] = new Node(distance * i, distance * j );
 
 			}
 		
@@ -37,7 +36,7 @@ public class Map {
         		int nodeY = (int) (ycord.doubleValue() / distance);
         		
         		map[nodeX][nodeY].setWalkable(false);
-        		map[nodeX][nodeY].setObstace(true);
+        		map[nodeX][nodeY].setObstacle(true);
         	}
 		
 		for (int i = 0; i < mapSize; i++)
@@ -60,7 +59,7 @@ public class Map {
 
 	public Node FindPath(List<point> outList)
 	{
-		if (startPoint.getLocation().equals(endPoint.getLocation()))
+		if (startPoint.equals(endPoint))
 		{
 			outList = new ArrayList<>();
             return endPoint;
@@ -78,34 +77,26 @@ public class Map {
 		for (Node near: nowPoint.getNext()) 
 			if (!closeList.contains(near) && near.isWalkable())
 				{
-//					System.out.println(near.isWalkable());
-					point temp1 = near.getLocation();
-					point temp2 = nowPoint.getLocation();
-					near.setG(nowPoint.getG() + temp1.getLength(temp2));
-					
-					point temp3 = endPoint.getLocation();
-					near.setH(temp1.getLength(temp3));
+					near.setG(nowPoint.getG() + near.getLength(nowPoint));
+
+					near.setH(near.getLength(endPoint));
 			
 					near.setF(near.getG() + near.getH());
 					
 					if (near.getF() < minF)
 					{
 						minF = near.getF();
-						nextNode.setLocation(near.getLocation());
-						nextNode.setNext(near.getNext());
-						nextNode.setF(near.getF());
-						nextNode.setH(near.getH());
-						nextNode.setG(near.getG());
+						nextNode = near;
 					}
 				}
 		closeList.add(nextNode);
 		minDistance += nextNode.getG();
-		outList.add(nextNode.getLocation());
-		if (nextNode.getLocation().equals(endPoint.getLocation()))
+		outList.add(nextNode);
+		if (nextNode.equals(endPoint))
 		{
-			if (startPoint.isObstace())
+			if (startPoint.isObstacle())
 				startPoint.setWalkable(false);
-			if (endPoint.isObstace())
+			if (endPoint.isObstacle())
 				endPoint.setWalkable(false);
 			closeList.clear();
 		}
