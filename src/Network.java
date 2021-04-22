@@ -193,6 +193,8 @@ public class Network {
         Network net = new Network();
         ComputingCenter brain = new ComputingCenter(net);
         brain.printDictionary();
+
+        // Run simulator
         double timeNow = 0;
         System.out.println(LocalDate.now() + "; " + LocalTime.now());
         System.out.println("Starting Simulation...");
@@ -212,7 +214,7 @@ public class Network {
                     }
                 }
                 int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
-                ManuBot mb = net.ManuList.get(1);
+                ManuBot mb = net.ManuList.get(AutoBotID);
                 mb.workList.add(tks);
                 System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
             }
@@ -245,8 +247,8 @@ public class Network {
             for (Task tks: net.ActiveTaskQueue){
                 point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
                 System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                //int AutoBotID = net.getAutoBotFromXTY(tks.getShelfLocation(), gateOutpoint);
-                ManuBot mb = net.ManuList.get(1);
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOutpoint);
+                ManuBot mb = net.ManuList.get(AutoBotID);
                 mb.pathPointList.add(tks.getLocationNow());
                 mb.pathPointList.add(gateOutpoint);
             }

@@ -80,12 +80,13 @@ public class Task {
     }
 
     // Constructor for copy
-    public Task(int ID, int numGateOut){
+    public Task(int ID, int numGateOut, point locationNow){
         setID(ID);
         setGateOutIDCopy(numGateOut);
+        setLocationNow(locationNow);
     }
 
     public Task copy(){
-        return new Task(this.getID(), this.getGateOut());
+        return new Task(this.getID(), this.getGateOut(), this.locationNow);
     }
 }
