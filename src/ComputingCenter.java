@@ -291,6 +291,9 @@ public class ComputingCenter {
 
         this.AverageTimeTrip = this.AverageTimeTrip(network);
         this.variables.put("Average time to finish a package/task", this.AverageTimeTrip);
+
+        // Print information
+        this.printDictionary();
     }
 
     // Getter

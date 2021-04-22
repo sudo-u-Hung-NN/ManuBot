@@ -192,7 +192,6 @@ public class Network {
     public static void main(String[] args) {
         Network net = new Network();
         ComputingCenter brain = new ComputingCenter(net);
-        brain.printDictionary();
         Map map = new Map();
 
         // Run simulator
@@ -263,7 +262,7 @@ public class Network {
 
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
-                    mb.Running(net, Cyc_time);
+                    mb.Running(net, map, Cyc_time);
                 }
             }
 
