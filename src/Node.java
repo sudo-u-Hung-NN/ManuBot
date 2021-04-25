@@ -1,36 +1,22 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node {
-	private point location;
+public class Node extends point{
 	private boolean isWalkable = true;
-	private boolean isObstace = false;
+	private boolean isObstacle = false;
 	private List<Node> next = new ArrayList<>();
 	private double H;
 	private double G;
 	private double F;
-	public Node(point location) {
-		this.location = location;
-	}
-	
+
 	public Node() {
-		point t = new point(0,0);
-		this.location = t;
+
 	}
 
-	public point getLocation() {
-		return location;
+	public Node(double x, double y) {
+		super(x,y);
 	}
-	public void setLocation(point location) {
-		this.location = location;
-	}
-	public void setLocation(int X,int Y) {
-		double doubleX = X;
-		double doubleY = Y;
-		this.location.setX(doubleX);
-		this.location.setY(doubleY);
-	}
-	
+
 	public boolean isWalkable() {
 		return isWalkable;
 	}
@@ -65,12 +51,12 @@ public class Node {
 		F = f;
 	}
 
-	public boolean isObstace() {
-		return isObstace;
+	public boolean isObstacle() {
+		return isObstacle;
 	}
 
-	public void setObstace(boolean isObstace) {
-		this.isObstace = isObstace;
+	public void setObstacle(boolean isObstacle) {
+		this.isObstacle = isObstacle;
 	}
 	
 	
