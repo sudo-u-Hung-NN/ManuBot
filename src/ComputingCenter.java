@@ -31,10 +31,10 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return average length from a shelf to a gate_out
      */
-    private double AverageLength_STGo(List<TaskShelf> shelfList, List<GateIn> gateOutList){
+    private double AverageLength_STGo(List<TaskShelf> shelfList, List<GateOut> gateOutList){
         double S = 0.0;
         for (TaskShelf ts: shelfList){
-            for (GateIn gt : gateOutList){
+            for (GateOut gt : gateOutList){
                 S += ts.getLocation().getLength(gt.getLocation());
             }
         }
@@ -62,10 +62,10 @@ public class ComputingCenter {
      * @param gateOutList: list of gate_out
      * @return average length from a random gate in to a random gate out
      */
-    private double AverageLength_GiTGo(List<GateIn> gateInList, List<GateIn> gateOutList){
+    private double AverageLength_GiTGo(List<GateIn> gateInList, List<GateOut> gateOutList){
         double S = 0;
         for (GateIn gti: gateInList){
-            for (GateIn gto: gateOutList){
+            for (GateOut gto: gateOutList){
                 S += gti.getLocation().getLength(gto.getLocation());
             }
         }

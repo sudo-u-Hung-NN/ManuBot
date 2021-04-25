@@ -35,10 +35,10 @@ public class Network {
     public List<Task> TaskList = new ArrayList<>();
 
     // Get list
-    public List<ManuBot> getChargingList(){
+    public List<ManuBot> getChargingList() {
         List<ManuBot> chargeList = new ArrayList<>();
-        for (ManuBot mb: this.ManuList){
-            if (mb.getChargingTimeLeft() > 0){
+        for (ManuBot mb : this.ManuList) {
+            if (mb.getChargingTimeLeft() > 0) {
                 chargeList.add(mb);
             }
         }
@@ -66,37 +66,41 @@ public class Network {
     private List<Task> ActiveTaskQueue;  // Queue Yeu cau
 
     // Objects interact section
-    public void insertChargerList(Charger chgr) {this.ChargerList.add(chgr);}
+    public void insertChargerList(Charger chgr) {
+        this.ChargerList.add(chgr);
+    }
 
-    public void insertShelfList(TaskShelf ts){
+    public void insertShelfList(TaskShelf ts) {
         this.ShelfList.add(ts);
     }
 
-    public void insertManuList(ManuBot mb){
+    public void insertManuList(ManuBot mb) {
         this.ManuList.add(mb);
     }
 
-    public void insertGateInList(GateIn gt){
+    public void insertGateInList(GateIn gt) {
         this.GateInList.add(gt);
     }
 
-    public void insertGateOutList(GateOut gt){ this.GateOutList.add(gt); }
+    public void insertGateOutList(GateOut gt) {
+        this.GateOutList.add(gt);
+    }
 
     // Queues interact section
-    public void insertArrivalTaskQueue(Task nt){
+    public void insertArrivalTaskQueue(Task nt) {
         this.ArrivalTaskQueue.add(nt);
         this.TaskList.add(nt);
     }
 
-    public void insertActiveTaskQueue(Task nt){
+    public void insertActiveTaskQueue(Task nt) {
         this.ActiveTaskQueue.add(nt);
     }
 
-    public boolean isNewTask(){
+    public boolean isNewTask() {
         return this.ArrivalTaskQueue.isEmpty();
     }
 
-    public boolean isRequesting(){
+    public boolean isRequesting() {
         return this.ActiveTaskQueue.isEmpty();
     }
 
@@ -105,9 +109,9 @@ public class Network {
     }
 
     // Get task that is active by insert its ID
-    public Task getActiveTask(int ID){
-        for (Task i: this.ActiveTaskQueue){
-            if (i.getID() == ID){
+    public Task getActiveTask(int ID) {
+        for (Task i : this.ActiveTaskQueue) {
+            if (i.getID() == ID) {
                 return i;
             }
         }
@@ -115,9 +119,9 @@ public class Network {
     }
 
     // Get task that is active by insert its ID
-    public Task getArrivalTask(int ID){
-        for (Task i: this.ArrivalTaskQueue){
-            if (i.getID() == ID){
+    public Task getArrivalTask(int ID) {
+        for (Task i : this.ArrivalTaskQueue) {
+            if (i.getID() == ID) {
                 return i;
             }
         }
@@ -134,9 +138,9 @@ public class Network {
         return this.numTaskTotal;
     }
 
-    public boolean isAllShelvesFull(){
-        for (TaskShelf tsh: this.ShelfList){
-            if (!tsh.isFull()){
+    public boolean isAllShelvesFull() {
+        for (TaskShelf tsh : this.ShelfList) {
+            if (!tsh.isFull()) {
                 return false;
             }
         }
@@ -144,7 +148,7 @@ public class Network {
     }
 
     // Constructor
-    public Network(){
+    public Network() {
         // Initialize Queues
         this.ArrivalTaskQueue = new ArrayList<>();
         this.ActiveTaskQueue = new ArrayList<>();
@@ -155,13 +159,13 @@ public class Network {
         String[] GateInY = Gate_ycord_in.split(";");
         String[] GateOutX = Gate_xcord_out.split(";");
         String[] GateOutY = Gate_ycord_out.split(";");
-        for (int i = 0; i < GateInX.length; i++){
+        for (int i = 0; i < GateInX.length; i++) {
             point X = new point(Double.parseDouble(GateInX[i]), Double.parseDouble(GateInY[i]));
             GateIn gt = new GateIn(i, X);
             insertGateInList(gt);
             System.out.println("Gate_in id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
-        for (int i =0; i < GateOutX.length; i++){
+        for (int i = 0; i < GateOutX.length; i++) {
             point X = new point(Double.parseDouble(GateOutX[i]), Double.parseDouble(GateOutY[i]));
             GateOut gt = new GateOut(i, X);
             insertGateOutList(gt);
@@ -172,7 +176,7 @@ public class Network {
         System.out.println("Initializing Chargers...");
         String[] ChargerX = Charger_xcord.split(";");
         String[] ChargerY = Charger_ycord.split(";");
-        for (int i=0; i < ChargerX.length; i++){
+        for (int i = 0; i < ChargerX.length; i++) {
             point X = new point(Double.parseDouble(ChargerX[i]), Double.parseDouble(ChargerY[i]));
             Charger chgr = new Charger(i, X);
             insertChargerList(chgr);
@@ -183,7 +187,7 @@ public class Network {
         System.out.println("Initializing Shelves...");
         String[] ShelfX = Shelf_xcord.split(";");
         String[] ShelfY = Shelf_ycord.split(";");
-        for (int i = 0; i < ShelfX.length; i ++){
+        for (int i = 0; i < ShelfX.length; i++) {
             point X = new point(Double.parseDouble(ShelfX[i]), Double.parseDouble(ShelfY[i]));
             TaskShelf ts = new TaskShelf(i, X);
             insertShelfList(ts);
@@ -192,14 +196,14 @@ public class Network {
 
         // Initialize autoBots and setting ids
         System.out.println("Initializing AutoBots...");
-        for (int i = 0; i < this.numManubot; i++){
-            point X = new point(0,0);
+        for (int i = 0; i < this.numManubot; i++) {
+            point X = new point(0, 0);
             ManuBot mb = new ManuBot(i, X, this);
             insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
 
-    }
+}
 
     public static void main(String[] args) {
         Network net = new Network();
@@ -275,8 +279,7 @@ public class Network {
                     Task tks = iter.next();
                     if (tks.isActive(timeNow)) {
                         System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
-                        Task nt = tks.copy();
-                        activeNow.add(nt);
+                        activeNow.add(tks);
                         iter.remove();
                     }
                 }

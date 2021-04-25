@@ -129,7 +129,7 @@ public class ManuBot { // Manufacture robot
         for (GateIn gt: network.getGateInList()){
             this.switchStatePoints.add(gt.getLocation());
         }
-        for (GateIn gt: network.getGateOutList()){
+        for (GateOut gt: network.getGateOutList()){
             this.switchStatePoints.add(gt.getLocation());
         }
         for (TaskShelf tsh: network.getShelfList()){
