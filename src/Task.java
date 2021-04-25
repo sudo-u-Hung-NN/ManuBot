@@ -9,13 +9,17 @@ public class Task {
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
-    public point shelfLocation = null;
+    private point shelfLocation = null;
 
     public point getShelfLocation() {
         return shelfLocation;
     }
 
-//    public void setShelfLocation(Network net) {
+    public void setShelfLocation(point shelfLocation) {
+        this.shelfLocation = shelfLocation;
+    }
+
+    //    public void setShelfLocation(Network net) {
 //        Random rand = new Random();
 //        int shelfID = rand.nextInt(net.getNumShelf());
 //        this.shelfLocation = net.getTaskShelfId(shelfID).getLocation();
@@ -80,13 +84,19 @@ public class Task {
     }
 
     // Constructor for copy
-    public Task(int ID, int numGateOut, point locationNow){
+    public Task(int ID, int numGateOut, point locationNow, double activateTime, point shelfLocation){
         setID(ID);
         setGateOutIDCopy(numGateOut);
         setLocationNow(locationNow);
+        this.activateTime = activateTime;
+        this.shelfLocation = shelfLocation;
     }
 
     public Task copy(){
-        return new Task(this.getID(), this.getGateOut(), this.locationNow);
+        return new Task(this.getID(),
+                this.getGateOut(),
+                this.locationNow,
+                this.activateTime,
+                this.shelfLocation);
     }
 }

@@ -16,6 +16,9 @@ public class TaskShelf {
     public void setLocation(point location) {this.location = location; }
 
     public void insertShelf(Task t){
+        if (this.isFull()){
+            return;
+        }
         t.setLocationNow(this.getLocation());
         this.TaskList.add(t);
     }

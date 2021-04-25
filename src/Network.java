@@ -1,8 +1,10 @@
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 public class Network {
     private int numTaskTotal = 0;
@@ -207,16 +209,21 @@ public class Network {
 
             // For each task in Queue yeu cau, assign to autobots
             for (Task tks: net.ActiveTaskQueue){
-                point gateOutpoint = net.GateOutList.get(tks.getGateOut()).getLocation();
+                Gate gateOut = net.GateOutList.get(tks.getGateOut());
                 System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOutpoint);
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOut.getLocation());
                 if (AutoBotID < 0){
                     taskActiveRemain.add(tks);
                     continue;
                 }
                 ManuBot mb = net.ManuList.get(AutoBotID);
-                mb.pathPointList.add(tks.getLocationNow());
-                mb.pathPointList.add(gateOutpoint);
+
+                // mb.pathPointList.add(tks.getLocationNow());
+                // mb.pathPointList.add(gateOut.getLocation());
+
+                tks.setGateOut(gateOut.getGateID());
+                mb.workList.add(tks);
+
             }
 
             // Run gate
@@ -226,20 +233,32 @@ public class Network {
 
             // For each task in Queue sinh, assign to autobots
             for ( Task tks: net.ArrivalTaskQueue ){
-                for (TaskShelf tsh: net.ShelfList){
-                    if(!tsh.isFull()){
-                        tks.shelfLocation = tsh.getLocation();
+                int shelfID = -1;
+                int count = 0;
+                do {
+                    Random rand = new Random();
+                    shelfID = rand.nextInt(net.getNumShelf());
+                    count ++;
+                    if (count == net.getNumShelf()){
                         break;
                     }
+                }while (net.getShelfList().get(shelfID).isFull());
+                // If found a shelf that is not full
+                if (count != net.getNumShelf()){
+                    tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
+                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
+                    if (AutoBotID < 0){
+                        taskArriveRemain.add(tks);
+                        continue;
+                    }
+                    ManuBot mb = net.ManuList.get(AutoBotID);
+                    mb.workList.add(tks);
+                    System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
                 }
-                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
-                if (AutoBotID < 0){
+                else{
+                    // If can not find any shelf that is not full, put in remain list
                     taskArriveRemain.add(tks);
-                    continue;
                 }
-                ManuBot mb = net.ManuList.get(AutoBotID);
-                mb.workList.add(tks);
-                System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
             }
 
             // For all tasks, check if any are activated
@@ -259,11 +278,11 @@ public class Network {
                     net.ActiveTaskQueue.addAll(activeNow);
                 }
                 activeNow.clear();
+            }
 
-                // Running autoBot in amount of time equals cycle time
-                for (ManuBot mb : net.ManuList) {
-                    mb.Running(net, map, Cyc_time);
-                }
+            // Running autoBot in amount of time equals cycle time
+            for (ManuBot mb : net.ManuList) {
+                mb.Running(net, map, Cyc_time);
             }
 
             net.ActiveTaskQueue.clear();
