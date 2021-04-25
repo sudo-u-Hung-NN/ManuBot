@@ -1,6 +1,5 @@
 
 import java.util.*;
-import java.util.Map;
 
 public class ComputingCenter {
     // Some constant:
@@ -17,9 +16,9 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return average length from a gate_in to a shelf
      */
-    private double AverageLength_GiTS(List<Gate> gateInList, List<TaskShelf> shelfList){
+    private double AverageLength_GiTS(List<GateIn> gateInList, List<TaskShelf> shelfList){
         double S = 0.0;
-        for (Gate gt : gateInList){
+        for (GateIn gt : gateInList){
             for (TaskShelf ts : shelfList){
                 S += gt.getLocation().getLength(ts.getLocation());
             }
@@ -32,10 +31,10 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return average length from a shelf to a gate_out
      */
-    private double AverageLength_STGo(List<TaskShelf> shelfList, List<Gate> gateOutList){
+    private double AverageLength_STGo(List<TaskShelf> shelfList, List<GateIn> gateOutList){
         double S = 0.0;
         for (TaskShelf ts: shelfList){
-            for (Gate gt : gateOutList){
+            for (GateIn gt : gateOutList){
                 S += ts.getLocation().getLength(gt.getLocation());
             }
         }
@@ -63,10 +62,10 @@ public class ComputingCenter {
      * @param gateOutList: list of gate_out
      * @return average length from a random gate in to a random gate out
      */
-    private double AverageLength_GiTGo(List<Gate> gateInList, List<Gate> gateOutList){
+    private double AverageLength_GiTGo(List<GateIn> gateInList, List<GateIn> gateOutList){
         double S = 0;
-        for (Gate gti: gateInList){
-            for (Gate gto: gateOutList){
+        for (GateIn gti: gateInList){
+            for (GateIn gto: gateOutList){
                 S += gti.getLocation().getLength(gto.getLocation());
             }
         }

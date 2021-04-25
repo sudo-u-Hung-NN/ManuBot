@@ -1,9 +1,8 @@
 import java.time.LocalTime;
 import java.util.Random;
 
-public class Gate {
+public class GateIn {
     private point location;
-    private String type;
     private double makeTaskTime = 0;
     private String rangeRandom = Config.getInstance().getAsString("Gate_task_range");
     private String[] bound = rangeRandom.split(";");
@@ -17,14 +16,6 @@ public class Gate {
 
     public int getGateID() {
         return gateID;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public double getLowerBound() {
@@ -60,9 +51,8 @@ public class Gate {
     }
 
     // Constructor
-    public Gate(int ID, point X, String type){
+    public GateIn(int ID, point X){
         setGateID(ID);
-        setType(type);
         setLocation(X);
         this.makeTaskTime = 0;
     }
@@ -73,7 +63,6 @@ public class Gate {
 
     // Methods
     public void Running(Network net, double timeNow, int numGateOut){
-        if (this.getType().equals("In")){
             if (timeNow >= getMakeTaskTime()){
                 Task nt = new Task(net.getTaskID(), timeNow, numGateOut); // nt: new task
                 nt.setLocationNow(this.location);
@@ -82,10 +71,5 @@ public class Gate {
                 System.out.println("Gate_in id{" + this.getGateID() + "} created package id{"
                         + nt.getID() +"} at " + timeNow);
             }
-        }
-        if (this.getType().equals("Out")){
-            // Count task out;
-            // Print to file: TimeNow - ID
-        }
     }
 }

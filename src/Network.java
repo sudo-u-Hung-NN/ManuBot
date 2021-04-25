@@ -29,8 +29,8 @@ public class Network {
     // Objects list section
     private List<TaskShelf> ShelfList = new ArrayList<>();
     private List<ManuBot> ManuList = new ArrayList<>();
-    private List<Gate> GateInList = new ArrayList<>();
-    private List<Gate> GateOutList = new ArrayList<>();
+    private List<GateIn> GateInList = new ArrayList<>();
+    private List<GateOut> GateOutList = new ArrayList<>();
     public List<Charger> ChargerList = new ArrayList<>();
     public List<Task> TaskList = new ArrayList<>();
 
@@ -45,11 +45,11 @@ public class Network {
         return chargeList;
     }
 
-    public List<Gate> getGateInList() {
+    public List<GateIn> getGateInList() {
         return GateInList;
     }
 
-    public List<Gate> getGateOutList() {
+    public List<GateOut> getGateOutList() {
         return GateOutList;
     }
 
@@ -76,11 +76,11 @@ public class Network {
         this.ManuList.add(mb);
     }
 
-    public void insertGateInList(Gate gt){
+    public void insertGateInList(GateIn gt){
         this.GateInList.add(gt);
     }
 
-    public void insertGateOutList(Gate gt){ this.GateOutList.add(gt); }
+    public void insertGateOutList(GateOut gt){ this.GateOutList.add(gt); }
 
     // Queues interact section
     public void insertArrivalTaskQueue(Task nt){
@@ -134,6 +134,15 @@ public class Network {
         return this.numTaskTotal;
     }
 
+    public boolean isAllShelvesFull(){
+        for (TaskShelf tsh: this.ShelfList){
+            if (!tsh.isFull()){
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Constructor
     public Network(){
         // Initialize Queues
@@ -148,13 +157,13 @@ public class Network {
         String[] GateOutY = Gate_ycord_out.split(";");
         for (int i = 0; i < GateInX.length; i++){
             point X = new point(Double.parseDouble(GateInX[i]), Double.parseDouble(GateInY[i]));
-            Gate gt = new Gate(i, X, "In");
+            GateIn gt = new GateIn(i, X);
             insertGateInList(gt);
             System.out.println("Gate_in id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
         for (int i =0; i < GateOutX.length; i++){
             point X = new point(Double.parseDouble(GateOutX[i]), Double.parseDouble(GateOutY[i]));
-            Gate gt = new Gate(i, X, "Out");
+            GateOut gt = new GateOut(i, X);
             insertGateOutList(gt);
             System.out.println("Gate_out id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
@@ -210,7 +219,7 @@ public class Network {
 
             // For each task in Queue yeu cau, assign to autobots
             for (Task tks: net.ActiveTaskQueue){
-                Gate gateOut = net.GateOutList.get(tks.getGateOut());
+                GateOut gateOut = net.GateOutList.get(tks.getGateOut());
                 System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
                 int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOut.getLocation());
                 if (AutoBotID < 0){
@@ -228,24 +237,24 @@ public class Network {
             }
 
             // Run gate
-            for( Gate gts: net.GateInList ){
+            for( GateIn gts: net.GateInList ){
                 gts.Running(net, timeNow, net.GateOutList.size());
             }
 
             // For each task in Queue sinh, assign to autobots
             for ( Task tks: net.ArrivalTaskQueue ){
-                int shelfID = -1;
-                int count = 0;
-                do {
-                    Random rand = new Random();
-                    shelfID = rand.nextInt(net.getNumShelf());
-                    count ++;
-                    if (count == net.getNumShelf()){
-                        break;
-                    }
-                }while (net.getShelfList().get(shelfID).isFull());
-                // If found a shelf that is not full
-                if (count != net.getNumShelf()){
+                // If all shelves are full, then do nothing, wait until next cycleTime
+                if (net.isAllShelvesFull()){
+                    taskArriveRemain.addAll(net.ArrivalTaskQueue);
+                }
+                else{
+                    // If some shelves are not full, then find them
+                    int shelfID = -1;
+                    do {
+                        Random rand = new Random();
+                        shelfID = rand.nextInt(net.getNumShelf());
+                    }while (net.getShelfList().get(shelfID).isFull());
+                    // If found a shelf that is not full
                     tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
                     int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
                     if (AutoBotID < 0){
@@ -254,11 +263,7 @@ public class Network {
                     }
                     ManuBot mb = net.ManuList.get(AutoBotID);
                     mb.workList.add(tks);
-                    System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "}");
-                }
-                else{
-                    // If can not find any shelf that is not full, put in remain list
-                    taskArriveRemain.add(tks);
+                    System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
                 }
             }
 

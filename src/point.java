@@ -34,4 +34,8 @@ public class point {
         setX(x);
         setY(y);
     }
+
+    public point (){
+
+    }
 }

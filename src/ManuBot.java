@@ -99,19 +99,19 @@ public class ManuBot { // Manufacture robot
     public Double ECperSec = 0.0;
     public void Running(Network net, Map map, double cycleTime) {
         if (this.isFunctional()) {
-            if (this.chargingTimeLeft == 0) {
-                if (!this.workList.isEmpty()) {
-                    Task firstTask = this.workList.get(0);
-                    List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
-                    this.pathPointList.addAll(toDest);
-                    moving();
-                }
-                if (this.isDanger()) {
-                    ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
-                }
-            } else {
-                getReCharge(ECperSec, cycleTime);
-            }
+//            if (this.chargingTimeLeft == 0) {
+//                if (!this.workList.isEmpty()) {
+//                    Task firstTask = this.workList.get(0);
+//                    List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
+//                    this.pathPointList.addAll(toDest);
+//                    moving();
+//                }
+//                if (this.isDanger()) {
+//                    ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
+//                }
+//            } else {
+//                getReCharge(ECperSec, cycleTime);
+//            }
 //            System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + firstTask.getID() +"}");
             energySimulation(cycleTime);
             this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
@@ -126,10 +126,10 @@ public class ManuBot { // Manufacture robot
         setLocationNow(Location);
         setResEnergy(InitEnergy);
         this.switchStatePoints = new ArrayList<>();
-        for (Gate gt: network.getGateInList()){
+        for (GateIn gt: network.getGateInList()){
             this.switchStatePoints.add(gt.getLocation());
         }
-        for (Gate gt: network.getGateOutList()){
+        for (GateIn gt: network.getGateOutList()){
             this.switchStatePoints.add(gt.getLocation());
         }
         for (TaskShelf tsh: network.getShelfList()){

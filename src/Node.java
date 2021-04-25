@@ -10,7 +10,7 @@ public class Node extends point{
 	private double F;
 
 	public Node() {
-
+		super();
 	}
 
 	public Node(double x, double y) {
