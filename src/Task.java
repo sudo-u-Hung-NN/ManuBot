@@ -19,12 +19,6 @@ public class Task {
         this.shelfLocation = shelfLocation;
     }
 
-    //    public void setShelfLocation(Network net) {
-//        Random rand = new Random();
-//        int shelfID = rand.nextInt(net.getNumShelf());
-//        this.shelfLocation = net.getTaskShelfId(shelfID).getLocation();
-//    }
-
     public void setLocationNow(point locationNow) {
         this.locationNow = locationNow;
     }
@@ -81,22 +75,5 @@ public class Task {
         setID(ID);
         setActivateTime(timeNow);
         setGateOut(numGateOut);
-    }
-
-    // Constructor for copy
-    public Task(int ID, int numGateOut, point locationNow, double activateTime, point shelfLocation){
-        setID(ID);
-        setGateOutIDCopy(numGateOut);
-        setLocationNow(locationNow);
-        this.activateTime = activateTime;
-        this.shelfLocation = shelfLocation;
-    }
-
-    public Task copy(){
-        return new Task(this.getID(),
-                this.getGateOut(),
-                this.locationNow,
-                this.activateTime,
-                this.shelfLocation);
     }
 }
