@@ -4,27 +4,18 @@ public class Task {
     private int ID;
     private double activateTime;
     private int gateOutID;
-    private point locationNow;
     private String rangeRandom = Config.getInstance().getAsString("Task_active_range");
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
-    private point shelfLocation = null;
+    private point nextStop;
 
-    public point getShelfLocation() {
-        return shelfLocation;
+    public point getNextStop(){
+        return nextStop;
     }
 
-    public void setShelfLocation(point shelfLocation) {
-        this.shelfLocation = shelfLocation;
-    }
-
-    public void setLocationNow(point locationNow) {
-        this.locationNow = locationNow;
-    }
-
-    public point getLocationNow() {
-        return locationNow;
+    public void setNextStop(point nextStop) {
+        this.nextStop = nextStop;
     }
 
     public double getLowerBound() {
@@ -42,10 +33,6 @@ public class Task {
     public void setGateOut(int numGateOut) {
         Random rand = new Random();
         this.gateOutID = rand.nextInt(numGateOut);
-    }
-
-    public void setGateOutIDCopy(int GateOutId){
-        this.gateOutID = GateOutId;
     }
 
     public void setActivateTime(double now) {

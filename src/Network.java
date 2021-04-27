@@ -119,13 +119,8 @@ public class Network {
     }
 
     // Get task that is active by insert its ID
-    public Task getArrivalTask(int ID) {
-        for (Task i : this.ArrivalTaskQueue) {
-            if (i.getID() == ID) {
-                return i;
-            }
-        }
-        return null;
+    public void getArrivalTask(Task tsk) {
+        this.ArrivalTaskQueue.remove(tsk);
     }
 
     // ult
@@ -145,6 +140,46 @@ public class Network {
             }
         }
         return true;
+    }
+
+    public boolean amIatCharger(point location){
+        for (Charger chr : this.ChargerList){
+            if (chr.getLocation().equals(location))
+                return true;
+        }
+        return false;
+    }
+
+    public boolean amIatGateIn(point location){
+        for (GateIn gti: this.GateInList){
+            if (gti.getLocation().equals(location))
+                return true;
+        }
+        return false;
+    }
+
+    public GateOut amIatGateOut(point location){
+        for (GateOut gto: this.GateOutList){
+            if (gto.getLocation().equals(location))
+                return gto;
+        }
+        return null;
+    }
+
+    public TaskShelf amIatShelf(point location){
+        for (TaskShelf shf: this.ShelfList){
+            if (shf.getLocation().equals(location))
+                return shf;
+        }
+        return null;
+    }
+
+    public boolean isActive(Task tsk){
+        return this.ActiveTaskQueue.contains(tsk);
+    }
+
+    public void deleteActiveTask(Task tsk){
+        this.ActiveTaskQueue.remove(tsk);
     }
 
     // Constructor
@@ -225,16 +260,12 @@ public class Network {
             for (Task tks: net.ActiveTaskQueue){
                 GateOut gateOut = net.GateOutList.get(tks.getGateOut());
                 System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), gateOut.getLocation());
+                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
                 if (AutoBotID < 0){
                     taskActiveRemain.add(tks);
                     continue;
                 }
                 ManuBot mb = net.ManuList.get(AutoBotID);
-
-                // mb.pathPointList.add(tks.getLocationNow());
-                // mb.pathPointList.add(gateOut.getLocation());
-
                 tks.setGateOut(gateOut.getGateID());
                 mb.workList.add(tks);
 
@@ -259,8 +290,8 @@ public class Network {
                         shelfID = rand.nextInt(net.getNumShelf());
                     }while (net.getShelfList().get(shelfID).isFull());
                     // If found a shelf that is not full
-                    tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
-                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getLocationNow(), tks.getShelfLocation());
+                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
+                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
                     if (AutoBotID < 0){
                         taskArriveRemain.add(tks);
                         continue;

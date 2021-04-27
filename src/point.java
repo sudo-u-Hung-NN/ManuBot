@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -29,7 +31,15 @@ public class point {
         return sqrt( pow(this.getX() - X.getX(), 2) + pow(this.getY() - X.getY(), 2));
     }
 
-    // Constructor: khởi tạo tọa độ 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        point point = (point) o;
+        return Double.compare(point.x, x) == 0 && Double.compare(point.y, y) == 0;
+    }
+
+    // Constructor: khởi tạo tọa độ
     public point(double x, double y){
         setX(x);
         setY(y);

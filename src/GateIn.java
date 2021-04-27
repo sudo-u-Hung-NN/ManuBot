@@ -65,7 +65,7 @@ public class GateIn {
     public void Running(Network net, double timeNow, int numGateOut){
             if (timeNow >= getMakeTaskTime()){
                 Task nt = new Task(net.getTaskID(), timeNow, numGateOut); // nt: new task
-                nt.setLocationNow(this.location);
+                nt.setNextStop(this.location);
                 net.insertArrivalTaskQueue(nt);
                 setTaskInterval();
                 System.out.println("Gate_in id{" + this.getGateID() + "} created package id{"

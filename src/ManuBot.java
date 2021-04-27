@@ -71,20 +71,43 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving()
+    public void moving(point nextPoint, Network network)
     {
-    	if (this.getChargingTimeLeft() > 0){
-    	    return;
+        this.locationNow = nextPoint;
+
+    	// If at gate in ...
+        if (network.amIatGateIn(this.getLocationNow())){
+            network.getArrivalTask(this.workList.get(0));
+            assert this.workList.get(0) != null: "Invalid remove task";
+            this.isTransporting *= -1;
         }
-    	if (this.switchStatePoints.contains(locationNow))
-    	{
-    		this.isTransporting *= -1;
-    		return;
-    	}
-    	else {
-    		this.locationNow = this.pathPointList.get(0);
-    		pathPointList.remove(0);
-    	}
+        // If at shelf ...
+        TaskShelf checkShelf = network.amIatShelf(getLocationNow());
+        if (checkShelf != null){
+            // Case1: come to get task
+            if (network.isActive(this.workList.get(0))){
+                network.deleteActiveTask(this.workList.get(0));
+                checkShelf.getTaskList().remove(this.workList.get(0));
+                this.workList.get(0).setNextStop(
+                        network.getGateOutList().get(
+                                this.workList.get(0).getGateOut()
+                        ).getLocation()
+                );
+            }
+            else {
+                // Case2: come to store task
+                checkShelf.getTaskList().add(this.workList.get(0));
+                this.workList.remove(0);
+            }
+            this.isTransporting *= -1;
+        }
+        // If at gate out ...
+        GateOut checkGateOut = network.amIatGateOut(getLocationNow());
+        if (checkGateOut != null){
+            checkGateOut.recieveTask(this.workList.get(0));
+            this.workList.remove(0);
+            this.isTransporting *= -1;
+        }
     }
     
     private void energySimulation(double cycleTime){
@@ -99,24 +122,30 @@ public class ManuBot { // Manufacture robot
     public Double ECperSec = 0.0;
     public void Running(Network net, Map map, double cycleTime) {
         if (this.isFunctional()) {
-//            if (this.chargingTimeLeft == 0) {
-//                if (!this.workList.isEmpty()) {
-//                    Task firstTask = this.workList.get(0);
-//                    List<point> toDest = getPath(this.getLocationNow(), firstTask.getLocationNow(), map);
-//                    this.pathPointList.addAll(toDest);
-//                    moving();
-//                }
-//                if (this.isDanger()) {
-//                    ECperSec = GoCharge(net, map); // set charging time > 0, return energy charging per second
-//                }
-//            } else {
-//                getReCharge(ECperSec, cycleTime);
-//            }
-//            System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + firstTask.getID() +"}");
+            boolean t = net.amIatCharger(this.getLocationNow());
+            if (this.chargingTimeLeft > 0 && t) {
+                assert ECperSec == 0: "Invalid charging energy called";
+                this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
+                this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
+            }
+            else if (this.chargingTimeLeft == 0 && t) {
+                getPath(locationNow, this.workList.get(0).getNextStop(), map);
+                moving(this.pathPointList.get(0), net);
+                System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + this.workList.get(0).getID() +"}");
+            }
+            else {
+                moving(this.pathPointList.get(0), net);
+                System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + this.workList.get(0).getID() +"}");
+            }
+            if (this.isDanger()){
+                // Đặt lại chargingTime > 0, đồng thời, thay đổi đường đi của AutoBo. Trả lại năng lượng sạc mỗi giây
+                ECperSec = this.GoCharge(net, map);
+            }
+
             energySimulation(cycleTime);
-            this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
-            assert chargingTimeLeft >= 0 :
+            assert chargingTimeLeft < 0 :
                     String.format("chargingTimeLeft is set false, value = %f", this.chargingTimeLeft);
+            System.out.println("AutoBot id{" + this.getId() +"} is at (x, y) = (" + this.locationNow.getX() +", " + this.locationNow.getY()+ ")");
         }
     }
 
@@ -175,42 +204,22 @@ public class ManuBot { // Manufacture robot
     }
 
     /** @author Nguyen Nang Hung
-     * 2 possibilities:
-     *      If chargingTimeLeft > timeCycle: then update the residual energy
-     *      then waits for the next timeCycle, chargingTimeLeft get reduced
-     *      If chargingTimeLeft <= timeCycle: then update the residual energy
-     *      and set chargingTimeLeft to zero
-     * @param timeCycle
-     */
-    public void getReCharge(double ECperSec, double timeCycle){
-        if (this.chargingTimeLeft > timeCycle){
-            // stand still
-            this.chargingTimeLeft -= timeCycle;
-        }
-        else{
-            setResEnergy(this.getResEnergy() + ECperSec*(this.chargingTimeLeft-timeCycle));
-            this.chargingTimeLeft = 0;
-        }
-    }
-
-    /** @author Nguyen Nang Hung
      * This function determine charging point, then insert path to that charger
      * @param net
      * @return charging energy per second of the chosen charger
      */
     public double GoCharge(Network net,Map map){
+        this.pathPointList.clear();
         // choose charger location
         Charger chgr = getCharger(net);
         // Find path to charging point
-        List<point> toCharger = getPath(this.getLocationNow(), chgr.getLocation(), map);
-        // Insert the path to the head of the path point list
-        this.pathPointList.addAll(0, toCharger);
+        getPath(this.getLocationNow(), chgr.getLocation(), map);
         // Determine charging time
         this.chargingTimeLeft = getChargeTime(chgr);
         return chgr.getECperSec();
     }
 
-    public List<point> getPath(point startPoint, point endPoint, Map map){
+    public void getPath(point startPoint, point endPoint, Map map){
         List<point> toDest = new ArrayList<>();
         // Determine points then insert into toDest list
 		Node newNode ;
@@ -223,6 +232,12 @@ public class ManuBot { // Manufacture robot
 		} while (!newNode.equals(map.getEndPoint()));
 		System.out.println("Find path completed");
         // Return toDest
-        return toDest;
+        this.pathPointList.addAll(toDest);
+    }
+
+    public point getNextNode(){
+        point tmp = this.pathPointList.get(0);
+        this.pathPointList.remove(0);
+        return tmp;
     }
 }
