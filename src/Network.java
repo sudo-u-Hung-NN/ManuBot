@@ -26,6 +26,7 @@ public class Network {
     private final String fileDetail = Config.getInstance().getAsString("DumpDetailFile");
     private final String fileAll = Config.getInstance().getAsString("DumpOverallFile");
 
+
     // Objects list section
     private List<TaskShelf> ShelfList = new ArrayList<>();
     private List<ManuBot> ManuList = new ArrayList<>();
@@ -59,6 +60,10 @@ public class Network {
 
     public List<ManuBot> getManuList() {
         return ManuList;
+    }
+
+    public List<Charger> getChargerList() {
+        return ChargerList;
     }
 
     //  Queues section
@@ -228,22 +233,21 @@ public class Network {
             insertShelfList(ts);
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
-
-        // Initialize autoBots and setting ids
-        System.out.println("Initializing AutoBots...");
-        for (int i = 0; i < this.numManubot; i++) {
-            point X = new point(0, 0);
-            ManuBot mb = new ManuBot(i, X, this);
-            insertManuList(mb);
-            System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
-        }
-
 }
 
     public static void main(String[] args) {
         Network net = new Network();
         ComputingCenter brain = new ComputingCenter(net);
-        Map map = new Map();
+        Map map = new Map(net);
+
+        // Initialize autoBots and setting ids
+        System.out.println("Initializing AutoBots...");
+        for (int i = 0; i < net.numManubot; i++) {
+            point X = new point(0, 0);
+            ManuBot mb = new ManuBot(i, map.point2node(X), map.getSwitchStateNodes());
+            net.insertManuList(mb);
+            System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
+        }
 
         // Run simulator
         double timeNow = 0;

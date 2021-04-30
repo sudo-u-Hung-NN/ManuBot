@@ -14,29 +14,70 @@ public class Map {
 	private int minDistance = 0;
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
 	private static final double distance = (double) factorySize / mapSize;
+	private List<Node> switchStateNodes = new ArrayList<>();
+
+	public Node point2node(point input){
+		int nodeX = (int) (input.getX()/distance);
+		int nodeY = (int) (input.getY()/distance);
+		return this.map[nodeX][nodeY];
+	}
 	
-	public Map() {
+	public Map(Network network) {
 	
 		for (int i = 0 ; i < mapSize ; i++)
 			for (int j = 0; j < mapSize; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
 			}
 		
-		String [] ObstacleX = Obstacle_xcord.split(";");
-        String [] ObstacleY = Obstacle_ycord.split(";");
-        for (int i = 0; i < ObstacleX.length; i ++)
-        	for (int j = 0; j < ObstacleY.length; j++)
-        	{
-        		Double xcord = Double.parseDouble(ObstacleX[i]);
-        		Double ycord = Double.parseDouble(ObstacleY[j]);
-        		
-        		int nodeX = (int) (xcord.doubleValue() / distance) ;
-        		int nodeY = (int) (ycord.doubleValue() / distance);
-        		
-        		map[nodeX][nodeY].setWalkable(false);
-        		map[nodeX][nodeY].setObstacle(true);
-        	}
-		
+//		String [] ObstacleX = Obstacle_xcord.split(";");
+//        String [] ObstacleY = Obstacle_ycord.split(";");
+//        for (int i = 0; i < ObstacleX.length; i ++)
+//        	for (int j = 0; j < ObstacleY.length; j++)
+//        	{
+//        		Double xcord = Double.parseDouble(ObstacleX[i]);
+//        		Double ycord = Double.parseDouble(ObstacleY[j]);
+//
+//        		int nodeX = (int) (xcord.doubleValue() / distance) ;
+//        		int nodeY = (int) (ycord.doubleValue() / distance);
+//
+//        		map[nodeX][nodeY].setWalkable(false);
+//        		map[nodeX][nodeY].setObstacle(true);
+//        	}
+
+        for (TaskShelf tsh : network.getShelfList()){
+        	int nodeX = (int)(tsh.getLocation().getX()/distance);
+        	int nodeY = (int)(tsh.getLocation().getY()/distance);
+
+        	map[nodeX][nodeY].setType(manuType.SHELF);
+			map[nodeX][nodeY].setWalkable(false);
+			map[nodeX][nodeY].setObstacle(true);
+
+			switchStateNodes.add(map[nodeX][nodeY]);
+		}
+
+        for (GateIn gti : network.getGateInList()){
+			int nodeX = (int)(gti.getLocation().getX()/distance);
+			int nodeY = (int)(gti.getLocation().getY()/distance);
+
+			map[nodeX][nodeY].setType(manuType.GATE_IN);
+			switchStateNodes.add(map[nodeX][nodeY]);
+		}
+
+		for (GateOut gto : network.getGateOutList()){
+			int nodeX = (int)(gto.getLocation().getX()/distance);
+			int nodeY = (int)(gto.getLocation().getY()/distance);
+
+			map[nodeX][nodeY].setType(manuType.GATE_OUT);
+			switchStateNodes.add(map[nodeX][nodeY]);
+		}
+
+		for (Charger chr : network.getChargerList()){
+			int nodeX = (int)(chr.getLocation().getX()/distance);
+			int nodeY = (int)(chr.getLocation().getY()/distance);
+
+			map[nodeX][nodeY].setType(manuType.CHARGER);
+		}
+
 		for (int i = 0; i < mapSize; i++)
 			for (int j = 0 ; j < mapSize; j++)
 			{
@@ -53,6 +94,10 @@ public class Map {
 			}
 	}
 
+	public List<Node> getSwitchStateNodes(){
+		return this.switchStateNodes;
+	}
+
 	public void printMapInformation(){
 		System.out.println(String.format("Map size: %d", mapSize));
 		System.out.println(String.format("Factory size: %d", factorySize));
@@ -61,7 +106,7 @@ public class Map {
 	}
 	
 
-	public Node FindPath(List<point> outList)
+	public Node FindPath(List<Node> outList)
 	{
 		if (startPoint.equals(endPoint))
 		{
@@ -117,7 +162,7 @@ public class Map {
 	}
 
 	public void setStartPoint(point startPoint) {
-		this.startPoint = this.pointToNode(startPoint);
+		this.startPoint = this.point2node(startPoint);
 		this.startPoint.setG(0);
 		
 	}
@@ -127,7 +172,7 @@ public class Map {
 	}
 
 	public void setEndPoint(point endPoint) {
-		this.endPoint = this.pointToNode(endPoint);
+		this.endPoint = this.point2node(endPoint);
 		this.endPoint.setH(0);
 	}
 
@@ -143,15 +188,4 @@ public class Map {
 	public double getDistance() {
 		return distance;
 	}
-
-
-	public Node pointToNode(point Point) {
-		double x = Point.getX();
-		double y = Point.getY();
-		int nodeX = (int) (x / distance);
-		int nodeY = (int) (y / distance);
-		return map[nodeX][nodeY];
-	}
-	
-
 }

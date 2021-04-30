@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Node extends point{
 	private boolean isWalkable = true;
 	private boolean isObstacle = false;
@@ -8,6 +9,31 @@ public class Node extends point{
 	private double H;
 	private double G;
 	private double F;
+	private manuType type;
+
+	public void setType(manuType type) {
+		this.type = type;
+	}
+
+	public manuType getType() {
+		return type;
+	}
+
+	public boolean isAtShelf() {
+		return this.type == manuType.SHELF;
+	}
+
+	public boolean isAtGateIn() {
+		return this.type == manuType.GATE_IN;
+	}
+
+	public boolean isAtGateOut() {
+		return this.type == manuType.GATE_OUT;
+	}
+
+	public boolean isAtCharger() {
+		return this.type == manuType.CHARGER;
+	}
 
 	public Node() {
 		super();

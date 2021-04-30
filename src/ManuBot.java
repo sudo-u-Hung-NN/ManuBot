@@ -14,10 +14,10 @@ public class ManuBot { // Manufacture robot
     private boolean isAdaptive = Config.getInstance().getAsBoolean("adaptive_charging");         // False if manual determining the percentage charging
     private double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
     public List<Task> workList = new ArrayList<>(); // List of works
-    public List<point> pathPointList = new ArrayList<>(); // List of points indicate path trajectories
+    public List<Node> pathNodeList = new ArrayList<>(); // List of point indicate path trajectories
     private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
-    private final List<point> switchStatePoints;
+    private final List<Node> switchStateNodes;
 
     // ************************************************************************************
     // Robot methods SECTION
@@ -34,7 +34,7 @@ public class ManuBot { // Manufacture robot
     	return this.speed;
     }
 
-    public void setLocationNow(point LocationNow){
+    public void setLocationNow(Node LocationNow){
         this.locationNow = LocationNow;
     }
 
@@ -71,42 +71,80 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving(point nextPoint, Network network)
+    public void moving(point nextNode, Network network, Map map)
     {
-        this.locationNow = nextPoint;
+        this.locationNow = nextNode;
 
     	// If at gate in ...
-        if (network.amIatGateIn(this.getLocationNow())){
-            network.getArrivalTask(this.workList.get(0));
-            assert this.workList.get(0) != null: "Invalid remove task";
-            this.isTransporting *= -1;
-        }
+//        if (network.amIatGateIn(this.getLocationNow())){
+//            network.getArrivalTask(this.workList.get(0));
+//            assert this.workList.get(0) != null: "Invalid remove task";
+//            this.isTransporting *= -1;
+//        }
         // If at shelf ...
-        TaskShelf checkShelf = network.amIatShelf(getLocationNow());
-        if (checkShelf != null){
-            // Case1: come to get task
-            if (network.isActive(this.workList.get(0))){
-                network.deleteActiveTask(this.workList.get(0));
-                checkShelf.getTaskList().remove(this.workList.get(0));
-                this.workList.get(0).setNextStop(
-                        network.getGateOutList().get(
-                                this.workList.get(0).getGateOut()
-                        ).getLocation()
-                );
-            }
-            else {
-                // Case2: come to store task
-                checkShelf.getTaskList().add(this.workList.get(0));
-                this.workList.remove(0);
-            }
-            this.isTransporting *= -1;
-        }
+//        TaskShelf checkShelf = network.amIatShelf(getLocationNow());
+//        if (checkShelf != null){
+//            // Case1: come to get task
+//            if (network.isActive(this.workList.get(0))){
+//                network.deleteActiveTask(this.workList.get(0));
+//                checkShelf.getTaskList().remove(this.workList.get(0));
+//                this.workList.get(0).setNextStop(
+//                        network.getGateOutList().get(
+//                                this.workList.get(0).getGateOut()
+//                        ).getLocation()
+//                );
+//            }
+//            else {
+//                // Case2: come to store task
+//                checkShelf.getTaskList().add(this.workList.get(0));
+//                this.workList.remove(0);
+//            }
+//            this.isTransporting *= -1;
+//        }
         // If at gate out ...
-        GateOut checkGateOut = network.amIatGateOut(getLocationNow());
-        if (checkGateOut != null){
-            checkGateOut.recieveTask(this.workList.get(0));
-            this.workList.remove(0);
-            this.isTransporting *= -1;
+//        GateOut checkGateOut = network.amIatGateOut(getLocationNow());
+//        if (checkGateOut != null){
+//            checkGateOut.recieveTask(this.workList.get(0));
+//            this.workList.remove(0);
+//            this.isTransporting *= -1;
+//        }
+
+        switch (map.point2node(this.locationNow).getType()){
+            case GATE_IN:
+                network.getArrivalTask(this.workList.get(0));
+                assert this.workList.get(0) != null: "Invalid remove task";
+                this.isTransporting *= -1;
+                break;
+            case GATE_OUT:
+                GateOut checkGateOut = network.amIatGateOut(getLocationNow());
+                assert checkGateOut != null : "Gate out null pointer";
+                checkGateOut.recieveTask(this.workList.get(0));
+                this.workList.remove(0);
+                this.isTransporting *= -1;
+                break;
+            case SHELF:
+                TaskShelf checkShelf = network.amIatShelf(getLocationNow());
+                if (checkShelf != null){
+                    // Case1: come to get task
+                    if (network.isActive(this.workList.get(0))){
+                        network.deleteActiveTask(this.workList.get(0));
+                        checkShelf.getTaskList().remove(this.workList.get(0));
+                        this.workList.get(0).setNextStop(
+                                network.getGateOutList().get(
+                                        this.workList.get(0).getGateOut()
+                                ).getLocation()
+                        );
+                    }
+                    else {
+                        // Case2: come to store task
+                        checkShelf.getTaskList().add(this.workList.get(0));
+                        this.workList.remove(0);
+                    }
+                    this.isTransporting *= -1;
+                }
+                break;
+            default:
+                break;
         }
     }
     
@@ -129,12 +167,12 @@ public class ManuBot { // Manufacture robot
                 this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
             }
             else if (this.chargingTimeLeft == 0 && t) {
-                getPath(locationNow, this.workList.get(0).getNextStop(), map);
-                moving(this.pathPointList.get(0), net);
+                getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
+                moving(this.pathNodeList.get(0), net, map);
                 System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + this.workList.get(0).getID() +"}");
             }
             else {
-                moving(this.pathPointList.get(0), net);
+                moving(this.pathNodeList.get(0), net, map);
                 System.out.println("AutoBot id{" + this.getId() + "}Doing task id{" + this.workList.get(0).getID() +"}");
             }
             if (this.isDanger()){
@@ -150,24 +188,15 @@ public class ManuBot { // Manufacture robot
     }
 
     // Constructor
-    public ManuBot(int ID, point Location, Network network){
+    public ManuBot(int ID, Node Location, List<Node> switchStateNodes){
         setID(ID);
         setLocationNow(Location);
         setResEnergy(InitEnergy);
-        this.switchStatePoints = new ArrayList<>();
-        for (GateIn gt: network.getGateInList()){
-            this.switchStatePoints.add(gt.getLocation());
-        }
-        for (GateOut gt: network.getGateOutList()){
-            this.switchStatePoints.add(gt.getLocation());
-        }
-        for (TaskShelf tsh: network.getShelfList()){
-            this.switchStatePoints.add(tsh.getLocation());
-        }
+        this.switchStateNodes = switchStateNodes;
     }
 
     // Interface ends here, start modifying code under this line
-    //***********************************************************
+    //**********************************************************
     // Methods to choose the charge point
     /** @author Nguyen Nang Hung
      * @param net
@@ -209,18 +238,18 @@ public class ManuBot { // Manufacture robot
      * @return charging energy per second of the chosen charger
      */
     public double GoCharge(Network net,Map map){
-        this.pathPointList.clear();
+        this.pathNodeList.clear();
         // choose charger location
         Charger chgr = getCharger(net);
         // Find path to charging point
-        getPath(this.getLocationNow(), chgr.getLocation(), map);
+        getPath(map.point2node(this.getLocationNow()), map.point2node(chgr.getLocation()) , map);
         // Determine charging time
         this.chargingTimeLeft = getChargeTime(chgr);
         return chgr.getECperSec();
     }
 
-    public void getPath(point startPoint, point endPoint, Map map){
-        List<point> toDest = new ArrayList<>();
+    public void getPath(Node startPoint, Node endPoint, Map map){
+        List<Node> toDest = new ArrayList<>();
         // Determine points then insert into toDest list
 		Node newNode ;
 		map.setStartPoint(startPoint);
@@ -232,12 +261,12 @@ public class ManuBot { // Manufacture robot
 		} while (!newNode.equals(map.getEndPoint()));
 		System.out.println("Find path completed");
         // Return toDest
-        this.pathPointList.addAll(toDest);
+        this.pathNodeList.addAll(toDest);
     }
 
-    public point getNextNode(){
-        point tmp = this.pathPointList.get(0);
-        this.pathPointList.remove(0);
+    public Node getNextNode(){
+        Node tmp = this.pathNodeList.get(0);
+        this.pathNodeList.remove(0);
         return tmp;
     }
 }
