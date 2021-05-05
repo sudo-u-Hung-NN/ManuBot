@@ -147,20 +147,12 @@ public class Network {
         return true;
     }
 
-    public boolean amIatCharger(point location){
-        for (Charger chr : this.ChargerList){
-            if (chr.getLocation().equals(location))
-                return true;
-        }
-        return false;
-    }
-
-    public boolean amIatGateIn(point location){
+    public GateIn amIatGateIn(point location){
         for (GateIn gti: this.GateInList){
             if (gti.getLocation().equals(location))
-                return true;
+                return gti;
         }
-        return false;
+        return null;
     }
 
     public GateOut amIatGateOut(point location){
@@ -237,9 +229,7 @@ public class Network {
 
     public static void main(String[] args) {
         Network net = new Network();
-        ComputingCenter brain = new ComputingCenter(net);
         Map map = new Map(net);
-
         // Initialize autoBots and setting ids
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < net.numManubot; i++) {
@@ -248,6 +238,8 @@ public class Network {
             net.insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
+
+        ComputingCenter brain = new ComputingCenter(net);
 
         // Run simulator
         double timeNow = 0;

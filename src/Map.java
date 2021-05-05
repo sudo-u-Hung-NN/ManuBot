@@ -5,12 +5,12 @@ import java.util.*;
 public class Map {
 	
 	public static final int mapSize = Config.getInstance().getAsInteger("Map_size");
-	private Node map[][] = new Node[mapSize][mapSize];
+	private Node map[][] = new Node[mapSize+1][mapSize+1];
 	private Node startPoint;
 	private Node endPoint;
 	private List<Node> closeList =  new ArrayList<>();
-	private String Obstacle_xcord = Config.getInstance().getAsString("Shelf_xcord");
-    private String Obstacle_ycord = Config.getInstance().getAsString("Shelf_ycord");
+//	private String Obstacle_xcord = Config.getInstance().getAsString("Shelf_xcord");
+//    private String Obstacle_ycord = Config.getInstance().getAsString("Shelf_ycord");
 	private int minDistance = 0;
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
 	private static final double distance = (double) factorySize / mapSize;
@@ -24,8 +24,8 @@ public class Map {
 	
 	public Map(Network network) {
 	
-		for (int i = 0 ; i < mapSize ; i++)
-			for (int j = 0; j < mapSize; j++) {
+		for (int i = 0 ; i < mapSize+1; i++)
+			for (int j = 0; j < mapSize+1; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
 			}
 		
@@ -58,6 +58,11 @@ public class Map {
         for (GateIn gti : network.getGateInList()){
 			int nodeX = (int)(gti.getLocation().getX()/distance);
 			int nodeY = (int)(gti.getLocation().getY()/distance);
+
+			if (map[nodeX][nodeY] == null){
+				System.out.println("Error here x = " + nodeX + ", y = " + nodeY);
+				System.exit(-5);
+			}
 
 			map[nodeX][nodeY].setType(manuType.GATE_IN);
 			switchStateNodes.add(map[nodeX][nodeY]);
