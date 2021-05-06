@@ -74,7 +74,6 @@ public class ManuBot { // Manufacture robot
     public void moving(point nextNode, Network network, Map map)
     {
         this.locationNow = nextNode;
-        System.out.println("AutoBot id{" + this.ID + "} is at location (x, y) = (" + this.locationNow.getX() + ", " + this.locationNow.getY() +")");
     	// If at gate in ...
 //        if (network.amIatGateIn(this.getLocationNow())){
 //            network.getArrivalTask(this.workList.get(0));
@@ -174,12 +173,12 @@ public class ManuBot { // Manufacture robot
             }
             else {
                 if (this.pathNodeList.isEmpty()){
-                    if (this.workList.isEmpty()){
-                        // ???
-                    }
+                    System.out.println("AutoBot id" + this.getId() + "} Doing nothing this cycle");
                 }
-                moving(this.pathNodeList.get(0), net, map);
-                System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + this.workList.get(0).getID() +"}");
+                else {
+                    moving(this.pathNodeList.get(0), net, map);
+                    System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + this.workList.get(0).getID() +"}");
+                }
             }
             if (this.isDanger()){
                 // Đặt lại chargingTime > 0, đồng thời, thay đổi đường đi của AutoBot. Trả lại năng lượng sạc mỗi giây

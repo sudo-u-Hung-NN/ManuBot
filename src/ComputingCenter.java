@@ -253,6 +253,14 @@ public class ComputingCenter {
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
 
+    public double TargetFunction(Network network, double mu, double currentEnergy, int k) {
+        double deltaSE = DeltaSigmaEnergy(network, currentEnergy, mu);
+        double deltaAE = DeltaAverageEnergy(network, mu, k);
+        double taskDR = TaskDoneRate(network);
+
+        return deltaAE - deltaSE + taskDR;
+    }
+
     public void printDictionary() {
         System.out.println("Printing Computation values ...");
         Enumeration<String> keys = this.variables.keys();
@@ -387,5 +395,32 @@ public class ComputingCenter {
         if (chooseID2 != -1)
             return chooseID2;
         return chooseID3;
+    }
+
+    // Timing section
+    public double getChargingTime(Network network, ManuBot mb, double cycleTime) {
+        double mu_bar = AverageChargingTimeLeft(network);
+        int NA = network.getManuList().size();
+        int k = network.getChargingList().size();
+        double Etb = AverageEnergy(network);
+
+        double Rk = (NA * Etb + k * mu_bar * EC)*(2 * P_tb - EC * 1.0/NA) - EC * mb.getResEnergy();
+        assert Rk > 0;
+
+        double Uk = (NA - 1) * Math.pow(P_tb, 2) + Math.pow(EC - P_tb, 2) - Math.pow(EC*1.0/NA - P_tb, 2);
+        assert Uk > 0;
+
+        // "Gradient" Descent
+        double mu_atsk = Rk/Uk;
+        double deltaF = 0;
+        double F_old = this.TargetFunction(network, mu_atsk, mb.getResEnergy(), k);
+        while (deltaF >= 0 && mu_atsk >= cycleTime) {
+            double F_new = this.TargetFunction(network, mu_atsk - cycleTime, mb.getResEnergy(), k);
+            deltaF = F_old - F_new;
+            mu_atsk = mu_atsk - cycleTime;
+            F_old = F_new;
+        }
+
+        return mu_atsk;
     }
 }
