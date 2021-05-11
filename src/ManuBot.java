@@ -259,11 +259,11 @@ public class ManuBot { // Manufacture robot
 		Node newNode ;
 		map.setStartPoint(startPoint);
 		map.setEndPoint(endPoint);
-		do
-		{
-			newNode = map.FindPath(toDest);
-			map.setStartPoint(newNode);
-		} while (!newNode.equals(map.getEndPoint()));
+//		do
+//		{
+//			newNode = map.FindPath(toDest);
+//			map.setStartPoint(newNode);
+//		} while (!newNode.equals(map.getEndPoint()));
 		System.out.println("Find path completed");
         // Return toDest
         this.pathNodeList.addAll(toDest);

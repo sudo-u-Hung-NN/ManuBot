@@ -109,32 +109,25 @@ public class Map {
 		System.out.println(String.format("Number of nodes: %d", mapSize*mapSize));
 //		System.out.println(String.format("Number of obstacles: %d"));
 	}
-	
 
-	public Node FindPath(List<Node> outList)
+
+	/**
+	 * Find the neighbor node whose distance to the destination is the shortest
+	 * and MUST BE shorter than that of current node to the destination
+	 * @param mb
+	 * @return
+	 */
+	public Node FindPath(ManuBot mb)
 	{
-		if (startPoint.equals(endPoint))
-		{
-			outList = new ArrayList<>();
-            return endPoint;
-		}
-		
-		// Set startPoint and endPoint is walkable 
-		startPoint.setWalkable(true);
-		endPoint.setWalkable(true);
-		
-		closeList.add(startPoint);
-		Node nowPoint = startPoint;
-		Node nextNode = new Node();
-		
+		Node currentNode = point2node(mb.getLocationNow());
+
 		double minF = 1000 * Math.sqrt(2);
-		for (Node near: nowPoint.getNext()) 
+
+		for (Node near: currentNode.getNext())
 			if (!closeList.contains(near) && near.isWalkable())
 				{
-					near.setG(nowPoint.getG() + near.getLength(nowPoint));
-
-					near.setH(near.getLength(endPoint));
-			
+					near.setG(currentNode.getG() + near.getLength(currentNode));
+					near.setH(near.getLength(mb.));
 					near.setF(near.getG() + near.getH());
 					
 					if (near.getF() < minF)
