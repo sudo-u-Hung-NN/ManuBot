@@ -28,6 +28,7 @@ public class Map {
 			for (int j = 0; j < mapSize+1; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
 				map[i][j].setType(manuType.NONE);
+				map[i][j].id = i * (mapSize + 1) + j;
 			}
 		
 //		String [] ObstacleX = Obstacle_xcord.split(";");
@@ -121,38 +122,28 @@ public class Map {
 	/**
 	 * Find the neighbor node whose distance to the destination is the shortest
 	 * and MUST BE shorter than that of current node to the destination
-	 * @param mb
-	 * @return
+	 * @param mb: current manubot
+	 * @return next node
 	 */
 	public Node FindPath(ManuBot mb)
 	{
 		Node currentNode = point2node(mb.getLocationNow());
+		Node destination = point2node(mb.workList.get(0).getNextStop());
 
-		double minF = 1000 * Math.sqrt(2);
+		double currentDist = currentNode.getLength(destination);
+		Node nextNode = null;
 
-		for (Node near: currentNode.getNext())
-			if (!closeList.contains(near) && near.isWalkable())
-				{
-					near.setG(currentNode.getG() + near.getLength(currentNode));
-					near.setH(near.getLength(mb.));
-					near.setF(near.getG() + near.getH());
-					
-					if (near.getF() < minF)
-					{
-						minF = near.getF();
-						nextNode = near;
-					}
+		for (Node near: currentNode.getNext()) {
+			if (near.id == destination.id) {
+				return near;
+			}
+			else if (!closeList.contains(near) && near.isWalkable()) {
+				double neighborDist = near.getLength(destination);
+				if (currentDist > neighborDist) {
+					currentDist = neighborDist;
+					nextNode = near;
 				}
-		closeList.add(nextNode);
-		minDistance += nextNode.getG();
-		outList.add(nextNode);
-		if (nextNode.equals(endPoint))
-		{
-			if (startPoint.isObstacle())
-				startPoint.setWalkable(false);
-			if (endPoint.isObstacle())
-				endPoint.setWalkable(false);
-			closeList.clear();
+			}
 		}
 		return nextNode;
 	}

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class Node extends point{
@@ -10,6 +11,7 @@ public class Node extends point{
 	private double G;
 	private double F;
 	private manuType type;
+	public int id;
 
 	public void setType(manuType type) {
 		this.type = type;
@@ -84,7 +86,4 @@ public class Node extends point{
 	public void setObstacle(boolean isObstacle) {
 		this.isObstacle = isObstacle;
 	}
-	
-	
-	
 }

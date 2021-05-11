@@ -228,19 +228,7 @@ public class ManuBot { // Manufacture robot
     }
 
     public void getPath(Node startPoint, Node endPoint, Map map){
-        List<Node> toDest = new ArrayList<>();
-        // Determine points then insert into toDest list
-		Node newNode ;
-		map.setStartPoint(startPoint);
-		map.setEndPoint(endPoint);
-//		do
-//		{
-//			newNode = map.FindPath(toDest);
-//			map.setStartPoint(newNode);
-//		} while (!newNode.equals(map.getEndPoint()));
-		System.out.println("Find path completed");
-        // Return toDest
-        this.pathNodeList.addAll(toDest);
+        this.pathNodeList.add(map.FindPath(this));
     }
 
     public Node getNextNode(){
