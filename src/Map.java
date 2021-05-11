@@ -27,6 +27,7 @@ public class Map {
 		for (int i = 0 ; i < mapSize+1; i++)
 			for (int j = 0; j < mapSize+1; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
+				map[i][j].setType(manuType.NONE);
 			}
 		
 //		String [] ObstacleX = Obstacle_xcord.split(";");
@@ -66,6 +67,8 @@ public class Map {
 
 			map[nodeX][nodeY].setType(manuType.GATE_IN);
 			switchStateNodes.add(map[nodeX][nodeY]);
+			map[nodeX][nodeY].setWalkable(false);
+			map[nodeX][nodeY].setObstacle(true);
 		}
 
 		for (GateOut gto : network.getGateOutList()){
@@ -74,6 +77,8 @@ public class Map {
 
 			map[nodeX][nodeY].setType(manuType.GATE_OUT);
 			switchStateNodes.add(map[nodeX][nodeY]);
+			map[nodeX][nodeY].setWalkable(false);
+			map[nodeX][nodeY].setObstacle(true);
 		}
 
 		for (Charger chr : network.getChargerList()){
@@ -81,6 +86,8 @@ public class Map {
 			int nodeY = (int)(chr.getLocation().getY()/distance);
 
 			map[nodeX][nodeY].setType(manuType.CHARGER);
+			map[nodeX][nodeY].setWalkable(false);
+			map[nodeX][nodeY].setObstacle(true);
 		}
 
 		for (int i = 0; i < mapSize; i++)

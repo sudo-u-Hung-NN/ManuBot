@@ -74,40 +74,9 @@ public class ManuBot { // Manufacture robot
     public void moving(point nextNode, Network network, Map map)
     {
         this.locationNow = nextNode;
-    	// If at gate in ...
-//        if (network.amIatGateIn(this.getLocationNow())){
-//            network.getArrivalTask(this.workList.get(0));
-//            assert this.workList.get(0) != null: "Invalid remove task";
-//            this.isTransporting *= -1;
-//        }
-        // If at shelf ...
-//        TaskShelf checkShelf = network.amIatShelf(getLocationNow());
-//        if (checkShelf != null){
-//            // Case1: come to get task
-//            if (network.isActive(this.workList.get(0))){
-//                network.deleteActiveTask(this.workList.get(0));
-//                checkShelf.getTaskList().remove(this.workList.get(0));
-//                this.workList.get(0).setNextStop(
-//                        network.getGateOutList().get(
-//                                this.workList.get(0).getGateOut()
-//                        ).getLocation()
-//                );
-//            }
-//            else {
-//                // Case2: come to store task
-//                checkShelf.getTaskList().add(this.workList.get(0));
-//                this.workList.remove(0);
-//            }
-//            this.isTransporting *= -1;
-//        }
-        // If at gate out ...
-//        GateOut checkGateOut = network.amIatGateOut(getLocationNow());
-//        if (checkGateOut != null){
-//            checkGateOut.recieveTask(this.workList.get(0));
-//            this.workList.remove(0);
-//            this.isTransporting *= -1;
-//        }
-
+        if(map.point2node(this.locationNow).getType() == null){
+            System.out.println(this.locationNow.getX() + "," + this.locationNow.getY());
+        }
         switch (map.point2node(this.locationNow).getType()){
             case GATE_IN:
                 network.getArrivalTask(this.workList.get(0));
@@ -141,6 +110,11 @@ public class ManuBot { // Manufacture robot
                     }
                     this.isTransporting *= -1;
                 }
+                break;
+            case CHARGER:
+                System.out.println("This is charger!");
+                break;
+            case NONE:
                 break;
             default:
                 break;
@@ -213,7 +187,7 @@ public class ManuBot { // Manufacture robot
         Charger output = null;
         for (Charger chgr: net.ChargerList){
             double dist = chgr.getLocation().getLength(getLocationNow());
-            if (dist > minDistance){
+            if (dist < minDistance){
                 minDistance = dist;
                 output = chgr;
             }
