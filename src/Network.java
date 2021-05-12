@@ -19,7 +19,7 @@ public class Network {
     private String Shelf_xcord = Config.getInstance().getAsString("Shelf_xcord");
     private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
-    public static double Cyc_time = Config.getInstance().getAsDouble("Cycle_time");
+    public static double Cyc_time;
 
 
     // Print to files section
@@ -147,35 +147,35 @@ public class Network {
         return true;
     }
 
-    public GateIn amIatGateIn(point location){
-        for (GateIn gti: this.GateInList){
+    public GateIn amIatGateIn(point location) {
+        for (GateIn gti : this.GateInList) {
             if (gti.getLocation().equals(location))
                 return gti;
         }
         return null;
     }
 
-    public GateOut amIatGateOut(point location){
-        for (GateOut gto: this.GateOutList){
+    public GateOut amIatGateOut(point location) {
+        for (GateOut gto : this.GateOutList) {
             if (gto.getLocation().equals(location))
                 return gto;
         }
         return null;
     }
 
-    public TaskShelf amIatShelf(point location){
-        for (TaskShelf shf: this.ShelfList){
+    public TaskShelf amIatShelf(point location) {
+        for (TaskShelf shf : this.ShelfList) {
             if (shf.getLocation().equals(location))
                 return shf;
         }
         return null;
     }
 
-    public boolean isActive(Task tsk){
+    public boolean isActive(Task tsk) {
         return this.ActiveTaskQueue.contains(tsk);
     }
 
-    public void deleteActiveTask(Task tsk){
+    public void deleteActiveTask(Task tsk) {
         this.ActiveTaskQueue.remove(tsk);
     }
 
@@ -225,12 +225,13 @@ public class Network {
             insertShelfList(ts);
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
-}
+    }
 
     public static void main(String[] args) {
         Network net = new Network();
         Map map = new Map(net);
         // Initialize autoBots and setting ids
+        /*
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < net.numManubot; i++) {
             point X = new point(0, 0);
@@ -238,6 +239,7 @@ public class Network {
             net.insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
+
 
         ComputingCenter brain = new ComputingCenter(net);
 
@@ -332,6 +334,8 @@ public class Network {
 
             timeNow += Cyc_time;
         }
+
+         */
     }
 
 }

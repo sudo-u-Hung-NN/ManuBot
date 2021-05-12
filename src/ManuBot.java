@@ -143,7 +143,8 @@ public class ManuBot { // Manufacture robot
             else if (this.chargingTimeLeft == 0 && t) {
                 getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
                 moving(this.pathNodeList.get(0), net, map);
-                System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + this.workList.get(0).getID() +"}");
+                Task currtask = this.workList.get(0);
+                System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY());
             }
             else {
                 if (this.pathNodeList.isEmpty()){
@@ -152,6 +153,8 @@ public class ManuBot { // Manufacture robot
                 else {
                     moving(this.pathNodeList.get(0), net, map);
                     System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + this.workList.get(0).getID() +"}");
+                    Task currtask = this.workList.get(0);
+                    System.out.println("AutoBot id{" + this.getId() + "} Doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY());
                 }
             }
             if (this.isDanger()){

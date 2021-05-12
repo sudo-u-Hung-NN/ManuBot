@@ -1,3 +1,4 @@
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.*;
 
@@ -9,12 +10,13 @@ public class Map {
 	private Node startPoint;
 	private Node endPoint;
 	private List<Node> closeList =  new ArrayList<>();
-//	private String Obstacle_xcord = Config.getInstance().getAsString("Shelf_xcord");
-//    private String Obstacle_ycord = Config.getInstance().getAsString("Shelf_ycord");
 	private int minDistance = 0;
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
+	private static final int speed = Config.getInstance().getAsInteger("speed");
 	private static final double distance = (double) factorySize / mapSize;
 	private List<Node> switchStateNodes = new ArrayList<>();
+
+	private final String outputFile = "Results/MapInformation.txt";
 
 	public Node point2node(point input){
 		int nodeX = (int) (input.getX()/distance);
@@ -28,23 +30,8 @@ public class Map {
 			for (int j = 0; j < mapSize+1; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
 				map[i][j].setType(manuType.NONE);
-				map[i][j].id = i * (mapSize + 1) + j;
+				map[i][j].id = i * (mapSize) + j;
 			}
-		
-//		String [] ObstacleX = Obstacle_xcord.split(";");
-//        String [] ObstacleY = Obstacle_ycord.split(";");
-//        for (int i = 0; i < ObstacleX.length; i ++)
-//        	for (int j = 0; j < ObstacleY.length; j++)
-//        	{
-//        		Double xcord = Double.parseDouble(ObstacleX[i]);
-//        		Double ycord = Double.parseDouble(ObstacleY[j]);
-//
-//        		int nodeX = (int) (xcord.doubleValue() / distance) ;
-//        		int nodeY = (int) (ycord.doubleValue() / distance);
-//
-//        		map[nodeX][nodeY].setWalkable(false);
-//        		map[nodeX][nodeY].setObstacle(true);
-//        	}
 
         for (TaskShelf tsh : network.getShelfList()){
         	int nodeX = (int)(tsh.getLocation().getX()/distance);
@@ -60,11 +47,6 @@ public class Map {
         for (GateIn gti : network.getGateInList()){
 			int nodeX = (int)(gti.getLocation().getX()/distance);
 			int nodeY = (int)(gti.getLocation().getY()/distance);
-
-			if (map[nodeX][nodeY] == null){
-				System.out.println("Error here x = " + nodeX + ", y = " + nodeY);
-				System.exit(-5);
-			}
 
 			map[nodeX][nodeY].setType(manuType.GATE_IN);
 			switchStateNodes.add(map[nodeX][nodeY]);
@@ -105,6 +87,10 @@ public class Map {
 				if (j + 1 < mapSize)
 					map[i][j].getNext().add(map[i][j+1]);
 			}
+
+		Network.Cyc_time = distance * 1.0/speed;
+
+			printMapInformation();
 	}
 
 	public List<Node> getSwitchStateNodes(){
@@ -112,10 +98,30 @@ public class Map {
 	}
 
 	public void printMapInformation(){
-		System.out.println(String.format("Map size: %d", mapSize));
-		System.out.println(String.format("Factory size: %d", factorySize));
-		System.out.println(String.format("Number of nodes: %d", mapSize*mapSize));
-//		System.out.println(String.format("Number of obstacles: %d"));
+		try {
+			FileWriter fileout = new FileWriter(outputFile, false);
+			fileout.write("Map size: " + mapSize + "\n");
+			fileout.write("Factory size: " + factorySize + "\n");
+			fileout.write("Number of nodes: " + (mapSize + 1)*(mapSize + 1) + "\n");
+
+			fileout.write("Map detail\n");
+			for (int i = 0; i < mapSize + 1; i ++) {
+				int check = 0;
+				for (int j = 0; j < mapSize + 1; j ++) {
+					if (map[i][j].getType() != manuType.NONE) {
+						check = 1;
+						fileout.write(String.format("[%4d, %4d]. %s\t", i, j, map[i][j].getType()));
+					}
+				}
+				if (check == 1) {
+					fileout.write("\n");
+				}
+			}
+			fileout.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Done print map!!!");
 	}
 
 

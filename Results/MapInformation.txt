@@ -1,0 +1,13 @@
+Map size: 1000
+Factory size: 1000
+Number of nodes: 1002001
+Map detail
+[   0,    0]. CHARGER	[   0,  500]. GATE_OUT	[   0, 1000]. GATE_IN	
+[  10,   10]. CHARGER	
+[  20,   20]. CHARGER	
+[  30,   30]. CHARGER	
+[  40,   40]. CHARGER	
+[ 100,  500]. SHELF	[ 100,  700]. SHELF	
+[ 300,  500]. SHELF	[ 300,  700]. SHELF	
+[ 500,  500]. SHELF	[ 500,  700]. SHELF	
+[1000,  500]. GATE_OUT	[1000, 1000]. GATE_IN	
