@@ -1,4 +1,6 @@
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -23,9 +25,8 @@ public class Network {
 
 
     // Print to files section
-    private final String fileDetail = Config.getInstance().getAsString("DumpDetailFile");
-    private final String fileAll = Config.getInstance().getAsString("DumpOverallFile");
-
+    private FileWriter detailWriter;
+    private FileWriter generalWriter;
 
     // Objects list section
     private List<TaskShelf> ShelfList = new ArrayList<>();
@@ -228,13 +229,21 @@ public class Network {
             insertShelfList(ts);
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
+
+        // Initialize file pointers
+        try {
+            detailWriter = new FileWriter("Results/Detail.csv", false);
+            detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tLType\n");
+        } catch (IOException e) {
+            System.out.println("Failed to open file!");
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
         Network net = new Network();
         Map map = new Map(net);
         // Initialize autoBots and setting ids
-
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < net.numManubot; i++) {
             point X = new point(0, 0);
@@ -242,7 +251,6 @@ public class Network {
             net.insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
-
 
         ComputingCenter brain = new ComputingCenter(net);
 
@@ -253,96 +261,113 @@ public class Network {
 
         List<Task> taskActiveRemain = new ArrayList<>();
         List<Task> taskArriveRemain = new ArrayList<>();
-
-        while (timeNow < Sim_time){
-            System.out.println("===========================================");
-            System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
+        try {
+            while (timeNow < Sim_time){
+                System.out.println("===========================================");
+                System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
 //            System.out.println(timeNow);
 
-            // For each task in Queue yeu cau, assign to autobots
-            for (Task tks: net.ActiveTaskQueue){
-                GateOut gateOut = net.GateOutList.get(tks.getGateOut());
-                System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
-                if (AutoBotID < 0){
-                    taskActiveRemain.add(tks);
-                    continue;
-                }
-                ManuBot mb = net.ManuList.get(AutoBotID);
-                tks.setGateOut(gateOut.getGateID());
-                mb.workList.add(tks);
-
-            }
-
-            // Run gate
-            for( GateIn gts: net.GateInList ){
-                gts.Running(net, timeNow, net.GateOutList.size());
-            }
-
-            // For each task in Queue sinh, assign to autobots
-            for ( Task tks: net.ArrivalTaskQueue ){
-                // If all shelves are full, then do nothing, wait until next cycleTime
-                if (net.isAllShelvesFull()){
-                    taskArriveRemain.addAll(net.ArrivalTaskQueue);
-                }
-                else{
-                    // If some shelves are not full, then find them
-                    int shelfID = -1;
-                    do {
-                        Random rand = new Random();
-                        shelfID = rand.nextInt(net.getNumShelf());
-                    }while (net.getShelfList().get(shelfID).isFull());
-                    // If found a shelf that is not full
-                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
-
-//                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
-                    tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
-
+                // For each task in Queue yeu cau, assign to autobots
+                for (Task tks: net.ActiveTaskQueue){
+                    GateOut gateOut = net.GateOutList.get(tks.getGateOut());
+                    System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
                     if (AutoBotID < 0){
-                        taskArriveRemain.add(tks);
+                        taskActiveRemain.add(tks);
                         continue;
                     }
                     ManuBot mb = net.ManuList.get(AutoBotID);
+                    tks.setGateOut(gateOut.getGateID());
                     mb.workList.add(tks);
-                    System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
-                }
-            }
 
-            // For all tasks, check if any are activated
-            {
-                Iterator<Task> iter = net.TaskList.listIterator();
-                List<Task> activeNow = new ArrayList<>();
-                while (iter.hasNext()) {
-                    Task tks = iter.next();
-                    if (tks.isActive(timeNow)) {
-                        System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
-                        activeNow.add(tks);
-                        iter.remove();
+                }
+
+                // Run gate
+                for( GateIn gts: net.GateInList ){
+                    gts.Running(net, timeNow, net.GateOutList.size());
+                }
+
+                // For each task in Queue sinh, assign to autobots
+                for ( Task tks: net.ArrivalTaskQueue ){
+                    // If all shelves are full, then do nothing, wait until next cycleTime
+                    if (net.isAllShelvesFull()){
+                        taskArriveRemain.addAll(net.ArrivalTaskQueue);
+                    }
+                    else{
+                        // If some shelves are not full, then find them
+                        int shelfID = -1;
+                        do {
+                            Random rand = new Random();
+                            shelfID = rand.nextInt(net.getNumShelf());
+                        }while (net.getShelfList().get(shelfID).isFull());
+                        // If found a shelf that is not full
+                        int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
+
+//                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
+                        tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
+
+                        if (AutoBotID < 0){
+                            taskArriveRemain.add(tks);
+                            continue;
+                        }
+                        ManuBot mb = net.ManuList.get(AutoBotID);
+                        mb.workList.add(tks);
+                        System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
                     }
                 }
-                if (activeNow.size() > 0) {
-                    net.ActiveTaskQueue.addAll(activeNow);
+
+                // For all tasks, check if any are activated
+                {
+                    Iterator<Task> iter = net.TaskList.listIterator();
+                    List<Task> activeNow = new ArrayList<>();
+                    while (iter.hasNext()) {
+                        Task tks = iter.next();
+                        if (tks.isActive(timeNow)) {
+                            System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
+                            activeNow.add(tks);
+                            iter.remove();
+                        }
+                    }
+                    if (activeNow.size() > 0) {
+                        net.ActiveTaskQueue.addAll(activeNow);
+                    }
+                    activeNow.clear();
                 }
-                activeNow.clear();
+
+                // Running autoBot in amount of time equals cycle time
+                for (ManuBot mb : net.ManuList) {
+                    mb.Running(net, map, Cyc_time);
+                    try {
+                        net.detailWriter.write(String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\n",
+                                timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
+                                mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.exit(120);
+                    }
+                }
+
+                net.ActiveTaskQueue.clear();
+                net.ArrivalTaskQueue.clear();
+
+                net.ActiveTaskQueue.addAll(taskActiveRemain);
+                net.ArrivalTaskQueue.addAll(taskArriveRemain);
+
+                taskActiveRemain.clear();
+                taskArriveRemain.clear();
+
+                timeNow += Cyc_time;
             }
-
-            // Running autoBot in amount of time equals cycle time
-            for (ManuBot mb : net.ManuList) {
-                mb.Running(net, map, Cyc_time);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                net.detailWriter.close();
+            } catch (IOException e) {
+                System.out.println("Failed to close file");
+                e.printStackTrace();
             }
-
-            net.ActiveTaskQueue.clear();
-            net.ArrivalTaskQueue.clear();
-
-            net.ActiveTaskQueue.addAll(taskActiveRemain);
-            net.ArrivalTaskQueue.addAll(taskArriveRemain);
-
-            taskActiveRemain.clear();
-            taskArriveRemain.clear();
-
-            timeNow += Cyc_time;
         }
-
 
     }
 

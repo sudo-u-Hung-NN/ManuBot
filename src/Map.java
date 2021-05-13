@@ -39,7 +39,7 @@ public class Map {
 			for (int j = 0; j < mapSize+1; j++) {
 				map[i][j] = new Node(distance * i, distance * j );
 				map[i][j].setType(manuType.NONE);
-				map[i][j].id = i * (mapSize) + j;
+				map[i][j].id = i * (mapSize + 1) + j;
 			}
 
         for (TaskShelf tsh : network.getShelfList()){
