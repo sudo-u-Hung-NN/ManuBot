@@ -9,6 +9,15 @@ public class Task {
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
     private point nextStop;
+    private point shelfLocation;
+
+    public point getShelfLocation() {
+        return shelfLocation;
+    }
+
+    public void setShelfLocation(point shelfLocation) {
+        this.shelfLocation = shelfLocation;
+    }
 
     public point getNextStop(){
         return nextStop;

@@ -165,9 +165,12 @@ public class Network {
 
     public TaskShelf amIatShelf(point location) {
         for (TaskShelf shf : this.ShelfList) {
-            if (shf.getLocation().equals(location))
+            if (shf.getLocation().equals(location)) {
+                System.out.println("Here at shelf");
                 return shf;
+            }
         }
+        System.out.println(String.format("Location input (%.2f,%.2f) found no shelf", location.getX(), location.getY()));
         return null;
     }
 
@@ -231,7 +234,7 @@ public class Network {
         Network net = new Network();
         Map map = new Map(net);
         // Initialize autoBots and setting ids
-        /*
+
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < net.numManubot; i++) {
             point X = new point(0, 0);
@@ -252,6 +255,8 @@ public class Network {
         List<Task> taskArriveRemain = new ArrayList<>();
 
         while (timeNow < Sim_time){
+            System.out.println("===========================================");
+            System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
 //            System.out.println(timeNow);
 
             // For each task in Queue yeu cau, assign to autobots
@@ -289,7 +294,10 @@ public class Network {
                     }while (net.getShelfList().get(shelfID).isFull());
                     // If found a shelf that is not full
                     int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
-                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
+
+//                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
+                    tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
+
                     if (AutoBotID < 0){
                         taskArriveRemain.add(tks);
                         continue;
@@ -335,7 +343,7 @@ public class Network {
             timeNow += Cyc_time;
         }
 
-         */
+
     }
 
 }

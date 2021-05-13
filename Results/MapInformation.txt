@@ -1,13 +1,12 @@
 Map size: 1000
-Factory size: 1000
+Factory size: 500
 Number of nodes: 1002001
+VirtualM map size: 500.0
+Number of time step total: 3000.0
 Map detail
-[   0,    0]. CHARGER	[   0,  500]. GATE_OUT	[   0, 1000]. GATE_IN	
-[  10,   10]. CHARGER	
-[  20,   20]. CHARGER	
-[  30,   30]. CHARGER	
-[  40,   40]. CHARGER	
-[ 100,  500]. SHELF	[ 100,  700]. SHELF	
-[ 300,  500]. SHELF	[ 300,  700]. SHELF	
-[ 500,  500]. SHELF	[ 500,  700]. SHELF	
-[1000,  500]. GATE_OUT	[1000, 1000]. GATE_IN	
+[   0, 1000]. CHARGER	
+[ 200,  400]. SHELF	[ 200,  600]. SHELF	
+[ 300,    0]. GATE_OUT	[ 300, 1000]. GATE_IN	
+[ 600,  800]. SHELF	
+[ 700,    0]. GATE_OUT	[ 700, 1000]. GATE_IN	
+[1000,    0]. CHARGER	[1000, 1000]. CHARGER	

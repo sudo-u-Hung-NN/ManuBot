@@ -13,14 +13,23 @@ public class Map {
 	private int minDistance = 0;
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
 	private static final int speed = Config.getInstance().getAsInteger("speed");
+	private static final double simTime = Config.getInstance().getAsInteger("Simulation_time");
 	private static final double distance = (double) factorySize / mapSize;
 	private List<Node> switchStateNodes = new ArrayList<>();
 
 	private final String outputFile = "Results/MapInformation.txt";
 
 	public Node point2node(point input){
-		int nodeX = (int) (input.getX()/distance);
-		int nodeY = (int) (input.getY()/distance);
+		if (input == null) {
+			System.out.println("Null input point2node function\n");
+			System.exit(-1);
+		}
+		int nodeX = (int) (input.getX()/distance) ;
+		int nodeY = (int) (input.getY()/distance) ;
+		if (map[nodeX][nodeY] == null) {
+			System.out.println("Null return in point2node function: (nodeX, nodeY) = (" + nodeX + ", " + nodeY + ")");
+			System.exit(-1);
+		}
 		return this.map[nodeX][nodeY];
 	}
 	
@@ -73,18 +82,18 @@ public class Map {
 			map[nodeX][nodeY].setObstacle(true);
 		}
 
-		for (int i = 0; i < mapSize; i++)
-			for (int j = 0 ; j < mapSize; j++)
+		for (int i = 0; i < mapSize+1; i++)
+			for (int j = 0 ; j < mapSize+1; j++)
 			{
 				if (i - 1 >= 0)
 					map[i][j].setNext(map[i-1][j]);
 				if (j - 1 >= 0 )
 					map[i][j].setNext(map[i][j-1]);
-				if (i + 1 < mapSize )
+				if (i + 1 < mapSize+1 )
 				{
 					map[i][j].setNext(map[i+1][j]);
 				}
-				if (j + 1 < mapSize)
+				if (j + 1 < mapSize+1)
 					map[i][j].getNext().add(map[i][j+1]);
 			}
 
@@ -103,7 +112,8 @@ public class Map {
 			fileout.write("Map size: " + mapSize + "\n");
 			fileout.write("Factory size: " + factorySize + "\n");
 			fileout.write("Number of nodes: " + (mapSize + 1)*(mapSize + 1) + "\n");
-
+			fileout.write("VirtualM map size: " + mapSize * distance + "\n");
+			fileout.write("Number of time step total: " + simTime * speed * 1.0/distance + "\n");
 			fileout.write("Map detail\n");
 			for (int i = 0; i < mapSize + 1; i ++) {
 				int check = 0;
@@ -138,12 +148,21 @@ public class Map {
 
 		double currentDist = currentNode.getLength(destination);
 		Node nextNode = null;
-
+//		System.out.println(String.format(format"Here in FindPath : current autobot is at (%.2f, %.2f)", mb.getLocationNow().getX(), mb.getLocationNow().getY()));
+		System.out.print("Neighbor (x, y) = ");
 		for (Node near: currentNode.getNext()) {
-			if (near.id == destination.id) {
+			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
+		}
+		System.out.println();
+		System.out.print("Considering: ");
+		for (Node near: currentNode.getNext()) {
+			if (near.getX() == destination.getX() && near.getY() == destination.getY()) {
+				System.out.println("\nReach destination\n");
+				closeList.clear();
 				return near;
 			}
 			else if (!closeList.contains(near) && near.isWalkable()) {
+				System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
 				double neighborDist = near.getLength(destination);
 				if (currentDist > neighborDist) {
 					currentDist = neighborDist;
@@ -151,6 +170,12 @@ public class Map {
 				}
 			}
 		}
+		if (nextNode == null) {
+			System.out.println("\nReturn null in FindPath");
+			System.exit(-1);
+		}
+		System.out.println(String.format("\nFindPath: next go to this location: (%.2f, %.2f)\n", nextNode.getX(), nextNode.getY()));
+		closeList.add(currentNode);
 		return nextNode;
 	}
 	
