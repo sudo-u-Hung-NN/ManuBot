@@ -10,6 +10,7 @@ public class Task {
     private double ranging = Double.parseDouble(bound[1]);
     private point nextStop;
     private point shelfLocation;
+    public boolean isActive = false;
 
     public point getShelfLocation() {
         return shelfLocation;
@@ -40,6 +41,7 @@ public class Task {
     }
 
     public void setGateOut(int numGateOut) {
+        System.out.println("numGateOut = " + numGateOut);
         Random rand = new Random();
         this.gateOutID = rand.nextInt(numGateOut);
     }
@@ -63,7 +65,10 @@ public class Task {
     }
 
     public boolean isActive(double timeNow){
-        return timeNow >= getActivateTime();
+        if (timeNow >= getActivateTime()) {
+            isActive = true;
+        }
+        return isActive;
     }
 
     // Constructor

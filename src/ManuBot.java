@@ -95,8 +95,9 @@ public class ManuBot { // Manufacture robot
             case GATE_OUT:
                 GateOut checkGateOut = network.amIatGateOut(getLocationNow());
                 assert checkGateOut != null : "Gate out null pointer";
-                assert !this.workList.isEmpty() : "Worklist is empty";
+                assert !this.workList.isEmpty() : "Error, Work list is empty";
                 checkGateOut.recieveTask(this.workList.get(0));
+//                network.gateOutWriter.write(String.format());
                 this.workList.remove(0);
                 this.isTransporting *= -1;
                 break;
@@ -109,11 +110,7 @@ public class ManuBot { // Manufacture robot
                         System.out.println("AutoBot come to get task");
                         network.deleteActiveTask(this.workList.get(0));
                         checkShelf.getTaskList().remove(this.workList.get(0));
-                        this.workList.get(0).setNextStop(
-                                network.getGateOutList().get(
-                                        this.workList.get(0).getGateOut()
-                                ).getLocation()
-                        );
+                        this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
                     else {
                         // Case2: come to store task

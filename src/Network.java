@@ -25,8 +25,10 @@ public class Network {
 
 
     // Print to files section
-    private FileWriter detailWriter;
-    private FileWriter generalWriter;
+    protected FileWriter detailWriter;
+    protected FileWriter generalWriter;
+    protected FileWriter shelvesWriter;
+    protected FileWriter gateOutWriter;
 
     // Objects list section
     private List<TaskShelf> ShelfList = new ArrayList<>();
@@ -176,7 +178,7 @@ public class Network {
     }
 
     public boolean isActive(Task tsk) {
-        return this.ActiveTaskQueue.contains(tsk);
+        return tsk.isActive;
     }
 
     public void deleteActiveTask(Task tsk) {
@@ -234,6 +236,13 @@ public class Network {
         try {
             detailWriter = new FileWriter("Results/Detail.csv", false);
             detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tCNType\tDNType\n");
+
+            shelvesWriter = new FileWriter("Results/ShelvesDetail.csv", false);
+            shelvesWriter.write("Time\tID\tLSize\tRTaskID\tBotID\n");
+
+            gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
+            gateOutWriter.write("Time\tID\tBotID\tRTaskID\tTotal\n");
+
         } catch (IOException e) {
             System.out.println("Failed to open file!");
             e.printStackTrace();
@@ -267,6 +276,25 @@ public class Network {
                 System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
 //            System.out.println(timeNow);
 
+                // For all tasks, check if any are activated
+                {
+                    Iterator<Task> iter = net.TaskList.listIterator();
+                    List<Task> activeNow = new ArrayList<>();
+                    while (iter.hasNext()) {
+                        Task tks = iter.next();
+                        if (tks.isActive(timeNow)) {
+                            System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
+                            activeNow.add(tks);
+                            iter.remove();
+                        }
+                    }
+                    if (activeNow.size() > 0) {
+                        System.out.println("Add to ActiveTaskQueue");
+                        net.ActiveTaskQueue.addAll(activeNow);
+                    }
+                    activeNow.clear();
+                }
+
                 // For each task in Queue yeu cau, assign to autobots
                 for (Task tks: net.ActiveTaskQueue){
                     GateOut gateOut = net.GateOutList.get(tks.getGateOut());
@@ -277,9 +305,7 @@ public class Network {
                         continue;
                     }
                     ManuBot mb = net.ManuList.get(AutoBotID);
-                    tks.setGateOut(gateOut.getGateID());
                     mb.workList.add(tks);
-
                 }
 
                 // Run gate
@@ -316,24 +342,6 @@ public class Network {
                     }
                 }
 
-                // For all tasks, check if any are activated
-                {
-                    Iterator<Task> iter = net.TaskList.listIterator();
-                    List<Task> activeNow = new ArrayList<>();
-                    while (iter.hasNext()) {
-                        Task tks = iter.next();
-                        if (tks.isActive(timeNow)) {
-                            System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
-                            activeNow.add(tks);
-                            iter.remove();
-                        }
-                    }
-                    if (activeNow.size() > 0) {
-                        net.ActiveTaskQueue.addAll(activeNow);
-                    }
-                    activeNow.clear();
-                }
-
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
                     mb.Running(net, map, Cyc_time);
@@ -364,6 +372,8 @@ public class Network {
         }finally {
             try {
                 net.detailWriter.close();
+                net.shelvesWriter.close();
+                net.gateOutWriter.close();
             } catch (IOException e) {
                 System.out.println("Failed to close file");
                 e.printStackTrace();
