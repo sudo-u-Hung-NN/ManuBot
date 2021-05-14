@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving(point nextNode, Network network, Map map)
+    public void moving(point nextNode, Network network, Map map, double timeNow) throws IOException
     {
         if (nextNode == null) {
             System.out.println("Here in moving, wrong");
@@ -89,15 +90,13 @@ public class ManuBot { // Manufacture robot
                 assert this.workList.get(0) != null: "Invalid remove task";
                 this.isTransporting *= -1;
                 this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
-//                getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
                 System.out.println("AutoBot id{" + this.getId() + "} at gate in, now goes to a shelf.");
                 break;
             case GATE_OUT:
                 GateOut checkGateOut = network.amIatGateOut(getLocationNow());
                 assert checkGateOut != null : "Gate out null pointer";
                 assert !this.workList.isEmpty() : "Error, Work list is empty";
-                checkGateOut.recieveTask(this.workList.get(0));
-//                network.gateOutWriter.write(String.format());
+                checkGateOut.recieveTask(this.workList.get(0), this, network.gateOutWriter, timeNow);
                 this.workList.remove(0);
                 this.isTransporting *= -1;
                 break;
@@ -109,13 +108,15 @@ public class ManuBot { // Manufacture robot
                     if (network.isActive(this.workList.get(0))){
                         System.out.println("AutoBot come to get task");
                         network.deleteActiveTask(this.workList.get(0));
-                        checkShelf.getTaskList().remove(this.workList.get(0));
+//                        checkShelf.getTaskList().remove(this.workList.get(0));
+                        checkShelf.takeFromShelf(this, network.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
                     else {
                         // Case2: come to store task
                         System.out.println("AutoBot come to store task");
-                        checkShelf.getTaskList().add(this.workList.get(0));
+//                        checkShelf.getTaskList().add(this.workList.get(0));
+                        checkShelf.store2Shelf(this, network.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.remove(0);
                     }
                     this.isTransporting *= -1;
@@ -142,7 +143,7 @@ public class ManuBot { // Manufacture robot
     }
 
     public Double ECperSec = 0.0;
-    public void Running(Network net, Map map, double cycleTime) {
+    public void Running(Network net, Map map, double cycleTime, double timeNow) throws IOException{
         if (this.isFunctional()) {
             //boolean t = net.amIatCharger(this.getLocationNow()) == null;
             System.out.println("AutoBot id{" + this.getId() +"} is at (x, y) = (" + this.locationNow.getX() +", " + this.locationNow.getY() +
@@ -159,7 +160,7 @@ public class ManuBot { // Manufacture robot
                 System.out.println("I. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                         ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
                 getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
-                moving(this.pathNodeList.get(0), net, map);
+                moving(this.pathNodeList.get(0), net, map, timeNow);
             }
             else {
                 if (this.workList.isEmpty()){
@@ -171,7 +172,7 @@ public class ManuBot { // Manufacture robot
                             "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                             ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
                     getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
-                    moving(this.pathNodeList.get(0), net, map);
+                    moving(this.pathNodeList.get(0), net, map, timeNow);
                 }
             }
             if (this.isDanger()){

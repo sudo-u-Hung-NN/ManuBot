@@ -235,13 +235,13 @@ public class Network {
         // Initialize file pointers
         try {
             detailWriter = new FileWriter("Results/Detail.csv", false);
-            detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tCNType\tDNType\n");
+            detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tCNType\tDNType\tTaskID\tActive\n");
 
             shelvesWriter = new FileWriter("Results/ShelvesDetail.csv", false);
-            shelvesWriter.write("Time\tID\tLSize\tRTaskID\tBotID\n");
+            shelvesWriter.write("Time\tSID\tLSize\tRTaskID\tBotID\tMode\n");
 
             gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
-            gateOutWriter.write("Time\tID\tBotID\tRTaskID\tTotal\n");
+            gateOutWriter.write("Time\tGID\tBotID\tRTaskID\tTotal\n");
 
         } catch (IOException e) {
             System.out.println("Failed to open file!");
@@ -344,12 +344,16 @@ public class Network {
 
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
-                    mb.Running(net, map, Cyc_time);
+                    mb.Running(net, map, Cyc_time, timeNow);
                     try {
-                        net.detailWriter.write(String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\n",
+                        net.detailWriter.write(
+                            String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
                                 timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
                                 mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
-                                mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType()));
+                                mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
+                                mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
+                                mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
+                        );
                     } catch (Exception e) {
                         e.printStackTrace();
                         System.exit(120);

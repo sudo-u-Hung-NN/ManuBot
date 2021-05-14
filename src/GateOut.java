@@ -1,8 +1,10 @@
-import java.util.Random;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class GateOut {
     private point location;
     private int gateID = 0;
+    private static int count = 0;
 
     public void setGateID(int gateID) {
         this.gateID = gateID;
@@ -20,8 +22,11 @@ public class GateOut {
         return location;
     }
 
-    public void recieveTask(Task tsk){
-        System.out.println("Receive task id...");
+    public void recieveTask(Task tsk, ManuBot mb, FileWriter file, double timeNow) throws IOException {
+        System.out.println("Receive task id {" + tsk.getID() + "}");
+        file.write(String.format("%.2f\t%d\t%d\t%d\t%d\n",
+                timeNow, this.gateID, mb.getId(), tsk.getID(), GateOut.count));
+        count ++;
     }
 
     // Constructor
