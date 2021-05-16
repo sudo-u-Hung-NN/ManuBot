@@ -3,10 +3,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Network {
     private int numTaskTotal = 0;
@@ -22,13 +19,6 @@ public class Network {
     private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
     public static double Cyc_time;
-
-
-    // Print to files section
-    protected FileWriter detailWriter;
-    protected FileWriter generalWriter;
-    protected FileWriter shelvesWriter;
-    protected FileWriter gateOutWriter;
 
     // Objects list section
     private List<TaskShelf> ShelfList = new ArrayList<>();
@@ -232,24 +222,7 @@ public class Network {
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
 
-        // Initialize file pointers
-        try {
-            detailWriter = new FileWriter("Results/Detail.csv", false);
-            detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tCNType\tDNType\tTaskID\tActive\n");
 
-            generalWriter = new FileWriter("Results/General.csv", false);
-            generalWriter.write("BotID\tEnergy\n");
-
-            shelvesWriter = new FileWriter("Results/ShelvesDetail.csv", false);
-            shelvesWriter.write("Time\tSID\tLSize\tRTaskID\tBotID\tMode\n");
-
-            gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
-            gateOutWriter.write("Time\tGID\tBotID\tRTaskID\tTotal\n");
-
-        } catch (IOException e) {
-            System.out.println("Failed to open file!");
-            e.printStackTrace();
-        }
     }
 
     public static void main(String[] args) {
@@ -265,8 +238,10 @@ public class Network {
         }
         // Initial closeList for all manubots
         map.map4bot(net.ManuList);
-
+        // Initial computational center
         ComputingCenter brain = new ComputingCenter(net);
+        // Initial files
+        Ultilis.initFiles(net);
 
         // Run simulator
         double timeNow = 0;
@@ -350,19 +325,20 @@ public class Network {
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
                     mb.Running(net, map, Cyc_time, timeNow);
-                    try {
-                        net.detailWriter.write(
-                                String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
-                                        timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
-                                        mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
-                                        mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
-                                        mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
-                                        mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
-                        );
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        System.exit(120);
-                    }
+//                    try {
+//                        net.detailWriter.write(
+//                                String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
+//                                        timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
+//                                        mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
+//                                        mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
+//                                        mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
+//                                        mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
+//                        );
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                        System.exit(120);
+//                    }
+                    Ultilis.manuPrintFile(mb, map, timeNow);
                 }
 
                 net.ActiveTaskQueue.clear();
@@ -377,22 +353,25 @@ public class Network {
                 timeNow += Cyc_time;
             }
 
-            for (ManuBot mb : net.getManuList()) {
-                net.generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
-            }
+//            for (ManuBot mb : net.getManuList()) {
+//                net.generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
+//            }
+
+            Ultilis.dumpFinal(net);
 
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            try {
-                net.detailWriter.close();
-                net.shelvesWriter.close();
-                net.gateOutWriter.close();
-                net.generalWriter.close();
-            } catch (IOException e) {
-                System.out.println("Failed to close file");
-                e.printStackTrace();
-            }
+//            try {
+//                net.detailWriter.close();
+//                net.shelvesWriter.close();
+//                net.gateOutWriter.close();
+//                net.generalWriter.close();
+//            } catch (IOException e) {
+//                System.out.println("Failed to close file");
+//                e.printStackTrace();
+//            }
+            Ultilis.closeFile();
         }
 
     }
