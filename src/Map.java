@@ -4,18 +4,19 @@ import java.util.*;
 
 
 public class Map {
-	
 	public static final int mapSize = Config.getInstance().getAsInteger("Map_size");
 	private Node map[][] = new Node[mapSize+1][mapSize+1];
 	private Node startPoint;
 	private Node endPoint;
-	private List<Node> closeList =  new ArrayList<>();
+//	private List<Node> closeList =  new ArrayList<>();
 	private int minDistance = 0;
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
 	private static final int speed = Config.getInstance().getAsInteger("speed");
 	private static final double simTime = Config.getInstance().getAsInteger("Simulation_time");
 	private static final double distance = (double) factorySize / mapSize;
 	private List<Node> switchStateNodes = new ArrayList<>();
+
+	private HashMap<Integer, List<Node>> closeListDictionary = new HashMap<>();
 
 	private final String outputFile = "Results/MapInformation.txt";
 
@@ -98,8 +99,7 @@ public class Map {
 			}
 
 		Network.Cyc_time = distance * 1.0/speed;
-
-			printMapInformation();
+		printMapInformation();
 	}
 
 	public List<Node> getSwitchStateNodes(){
@@ -134,21 +134,30 @@ public class Map {
 		System.out.println("Done print map!!!");
 	}
 
-
+	public void map4bot(List<ManuBot> ManuList) {
+		for (ManuBot mb : ManuList) {
+			List<Node> closeList = new ArrayList<>();
+			this.closeListDictionary.put(mb.getId(), closeList);
+		}
+	}
 	/**
 	 * Find the neighbor node whose distance to the destination is the shortest
 	 * and MUST BE shorter than that of current node to the destination
 	 * @param mb: current manubot
+	 * @param currentNode
+	 * @param destination
 	 * @return next node
 	 */
-	public Node FindPath(ManuBot mb)
+	public Node FindPath(Node currentNode, Node destination, ManuBot mb)
 	{
-		Node currentNode = point2node(mb.getLocationNow());
-		Node destination = point2node(mb.workList.get(0).getNextStop());
+//		Node currentNode = point2node(mb.getLocationNow());
+//		Node destination = point2node(mb.workList.get(0).getNextStop());
+
+		// Get CloseList of the manubot
+		List<Node> closeList = this.closeListDictionary.get(mb.getId());
 
 		double currentDist = currentNode.getLength(destination);
 		Node nextNode = null;
-//		System.out.println(String.format(format"Here in FindPath : current autobot is at (%.2f, %.2f)", mb.getLocationNow().getX(), mb.getLocationNow().getY()));
 		System.out.print("Neighbor (x, y) = ");
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));

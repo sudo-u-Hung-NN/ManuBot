@@ -77,11 +77,9 @@ public class ManuBot { // Manufacture robot
         if (nextNode == null) {
             System.out.println("Here in moving, wrong");
         }
-        if (nextNode.equals(this.locationNow)) {
-            System.out.println("Error in moving");
-            System.exit(100);
+        if (this.locationNow.equals(nextNode)) {
+            System.out.println("Already at the destination");
         }
-
         this.locationNow = nextNode;
 
         switch (map.point2node(this.locationNow).getType()){
@@ -130,7 +128,9 @@ public class ManuBot { // Manufacture robot
             default:
                 break;
         }
-        this.pathNodeList.remove(0);
+        if (!this.pathNodeList.isEmpty()) {
+            this.pathNodeList.remove(0);
+        }
     }
     
     private void energySimulation(double cycleTime){
@@ -147,7 +147,7 @@ public class ManuBot { // Manufacture robot
         if (this.isFunctional()) {
             //boolean t = net.amIatCharger(this.getLocationNow()) == null;
             System.out.println("AutoBot id{" + this.getId() +"} is at (x, y) = (" + this.locationNow.getX() +", " + this.locationNow.getY() +
-                    "), current node type: " + ", current node type: " + map.point2node(this.locationNow).getType());
+                    "), current node type: " + map.point2node(this.locationNow).getType());
 
             boolean t = map.point2node(this.getLocationNow()).isAtCharger();
             if (this.chargingTimeLeft > 0 && t) {
@@ -159,7 +159,9 @@ public class ManuBot { // Manufacture robot
                 Task currtask = this.workList.get(0);
                 System.out.println("I. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                         ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
-                getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
+                Node currentNode = map.point2node(locationNow);
+                Node destination = map.point2node(this.workList.get(0).getNextStop());
+                getPath(currentNode, destination, map);
                 moving(this.pathNodeList.get(0), net, map, timeNow);
             }
             else {
@@ -171,8 +173,16 @@ public class ManuBot { // Manufacture robot
                     System.out.println("II. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.getID() +
                             "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                             ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
-                    getPath(map.point2node(locationNow), map.point2node(this.workList.get(0).getNextStop()), map);
-                    moving(this.pathNodeList.get(0), net, map, timeNow);
+                    Node currentNode = map.point2node(locationNow);
+                    Node destination = map.point2node(this.workList.get(0).getNextStop());
+                    if (currentNode.equals(destination)){
+                        moving(this.locationNow, net, map, timeNow);
+                    }
+                    if (!this.workList.isEmpty()) {
+                        destination = map.point2node(this.workList.get(0).getNextStop());
+                        getPath(currentNode, destination, map);
+                        moving(this.pathNodeList.get(0), net, map, timeNow);
+                    }
                 }
             }
             if (this.isDanger()){
@@ -248,7 +258,7 @@ public class ManuBot { // Manufacture robot
     }
 
     public void getPath(Node startPoint, Node endPoint, Map map){
-        this.pathNodeList.add(map.FindPath(this));
+        this.pathNodeList.add(map.FindPath(startPoint, endPoint, this));
     }
 
     public Node getNextNode(){

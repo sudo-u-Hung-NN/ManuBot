@@ -260,6 +260,8 @@ public class Network {
             net.insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
+        // Initial closeList for all manubots
+        map.map4bot(net.ManuList);
 
         ComputingCenter brain = new ComputingCenter(net);
 
