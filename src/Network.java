@@ -237,6 +237,9 @@ public class Network {
             detailWriter = new FileWriter("Results/Detail.csv", false);
             detailWriter.write("Time\tID\tXcord\tYcord\tEnergy\tState\tCNType\tDNType\tTaskID\tActive\n");
 
+            generalWriter = new FileWriter("Results/General.csv", false);
+            generalWriter.write("BotID\tEnergy\n");
+
             shelvesWriter = new FileWriter("Results/ShelvesDetail.csv", false);
             shelvesWriter.write("Time\tSID\tLSize\tRTaskID\tBotID\tMode\n");
 
@@ -349,12 +352,12 @@ public class Network {
                     mb.Running(net, map, Cyc_time, timeNow);
                     try {
                         net.detailWriter.write(
-                            String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
-                                timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
-                                mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
-                                mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
-                                mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
-                                mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
+                                String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
+                                        timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
+                                        mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
+                                        mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
+                                        mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
+                                        mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
                         );
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -373,6 +376,11 @@ public class Network {
 
                 timeNow += Cyc_time;
             }
+
+            for (ManuBot mb : net.getManuList()) {
+                net.generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -380,6 +388,7 @@ public class Network {
                 net.detailWriter.close();
                 net.shelvesWriter.close();
                 net.gateOutWriter.close();
+                net.generalWriter.close();
             } catch (IOException e) {
                 System.out.println("Failed to close file");
                 e.printStackTrace();

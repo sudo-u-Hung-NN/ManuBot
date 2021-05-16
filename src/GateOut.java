@@ -23,10 +23,10 @@ public class GateOut {
     }
 
     public void recieveTask(Task tsk, ManuBot mb, FileWriter file, double timeNow) throws IOException {
+        count ++;
         System.out.println("Receive task id {" + tsk.getID() + "}");
         file.write(String.format("%.2f\t%d\t%d\t%d\t%d\n",
                 timeNow, this.gateID, mb.getId(), tsk.getID(), GateOut.count));
-        count ++;
     }
 
     // Constructor

@@ -19,6 +19,7 @@ public class ManuBot { // Manufacture robot
     private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
     private final List<Node> switchStateNodes;
+    private Charger charger;
 
     // ************************************************************************************
     // Robot methods SECTION
@@ -164,6 +165,10 @@ public class ManuBot { // Manufacture robot
                 getPath(currentNode, destination, map);
                 moving(this.pathNodeList.get(0), net, map, timeNow);
             }
+            else if (this.chargingTimeLeft > 0 && !t) {
+                getPath(map.point2node(this.getLocationNow()), map.point2node(this.charger.getLocation()) , map);
+                moving(this.pathNodeList.get(0), net, map, timeNow);
+            }
             else {
                 if (this.workList.isEmpty()){
                     System.out.println("AutoBot id{" + this.getId() + "} Doing nothing this cycle");
@@ -185,7 +190,7 @@ public class ManuBot { // Manufacture robot
                     }
                 }
             }
-            if (this.isDanger()){
+            if (this.isDanger() && this.chargingTimeLeft <= 0){
                 // Đặt lại chargingTime > 0, đồng thời, thay đổi đường đi của AutoBot. Trả lại năng lượng sạc mỗi giây
                 ECperSec = this.GoCharge(net, map);
             }
@@ -249,21 +254,15 @@ public class ManuBot { // Manufacture robot
         System.out.println("Clear pathNodeList in Gocharge");
         this.pathNodeList.clear();
         // choose charger location
-        Charger chgr = getCharger(net);
+        this.charger = getCharger(net);
         // Find path to charging point
-        getPath(map.point2node(this.getLocationNow()), map.point2node(chgr.getLocation()) , map);
+        getPath(map.point2node(this.getLocationNow()), map.point2node(this.charger.getLocation()) , map);
         // Determine charging time
-        this.chargingTimeLeft = getChargeTime(chgr);
-        return chgr.getECperSec();
+        this.chargingTimeLeft = getChargeTime(this.charger);
+        return this.charger.getECperSec();
     }
 
     public void getPath(Node startPoint, Node endPoint, Map map){
         this.pathNodeList.add(map.FindPath(startPoint, endPoint, this));
-    }
-
-    public Node getNextNode(){
-        Node tmp = this.pathNodeList.get(0);
-        this.pathNodeList.remove(0);
-        return tmp;
     }
 }
