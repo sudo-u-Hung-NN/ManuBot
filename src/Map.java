@@ -157,26 +157,33 @@ public class Map {
 		List<Node> closeList = this.closeListDictionary.get(mb.getId());
 
 		double currentDist = currentNode.getLength(destination);
+		System.out.println(String.format("Current distance to destination (%.2f, %.2f) type %s: %.5f",
+				destination.getX(),destination.getY(), destination.getType(), currentDist));
 		Node nextNode = null;
 		System.out.print("Neighbor (x, y) = ");
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
 		}
-		System.out.println();
-		System.out.print("Considering: ");
+		currentDist = 1000;
+		System.out.print("\nConsidering: ");
 		for (Node near: currentNode.getNext()) {
-			if (near.getX() == destination.getX() && near.getY() == destination.getY()) {
+			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
+			if ((near.getX() == destination.getX() && near.getY() == destination.getY()) || near.id == destination.id) {
 				System.out.println("\nReach destination\n");
 				closeList.clear();
 				return near;
 			}
-			else if (!closeList.contains(near) && near.isWalkable()) {
-				System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
+			// !closeList.contains(near) &&
+			else if (near.isWalkable()) {
 				double neighborDist = near.getLength(destination);
-				if (currentDist > neighborDist) {
+				System.out.print(String.format("\t%.4f V", neighborDist));
+				if (currentDist >= neighborDist) {
 					currentDist = neighborDist;
 					nextNode = near;
 				}
+			}
+			else {
+				System.out.print("\tX");
 			}
 		}
 		if (nextNode == null) {

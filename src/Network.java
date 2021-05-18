@@ -90,6 +90,14 @@ public class Network {
         this.TaskList.add(nt);
     }
 
+    public int getArrivalListSize() {
+        return this.ArrivalTaskQueue.size();
+    }
+
+    public int getActiveListSize() {
+        return this.ActiveTaskQueue.size();
+    }
+
     public void insertActiveTaskQueue(Task nt) {
         this.ActiveTaskQueue.add(nt);
     }
@@ -254,7 +262,6 @@ public class Network {
             while (timeNow < Sim_time){
                 System.out.println("===========================================");
                 System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
-//            System.out.println(timeNow);
 
                 // For all tasks, check if any are activated
                 {
@@ -277,15 +284,18 @@ public class Network {
 
                 // For each task in Queue yeu cau, assign to autobots
                 for (Task tks: net.ActiveTaskQueue){
-                    GateOut gateOut = net.GateOutList.get(tks.getGateOut());
-                    System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
-                    if (AutoBotID < 0){
-                        taskActiveRemain.add(tks);
-                        continue;
+                    if (tks.announced == false) {
+                        GateOut gateOut = net.GateOutList.get(tks.getGateOut());
+                        System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                        int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
+                        if (AutoBotID < 0) {
+                            taskActiveRemain.add(tks);
+                            continue;
+                        }
+                        ManuBot mb = net.ManuList.get(AutoBotID);
+                        mb.workList.add(tks);
+                        tks.announced = true;
                     }
-                    ManuBot mb = net.ManuList.get(AutoBotID);
-                    mb.workList.add(tks);
                 }
 
                 // Run gate
@@ -325,19 +335,6 @@ public class Network {
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
                     mb.Running(net, map, Cyc_time, timeNow);
-//                    try {
-//                        net.detailWriter.write(
-//                                String.format("%.2f\t%d\t%.2f\t%.2f\t%.3f\t%s\t%s\t%s\t%d\t%s\n",
-//                                        timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
-//                                        mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
-//                                        mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
-//                                        mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
-//                                        mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
-//                        );
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        System.exit(120);
-//                    }
                     Ultilis.manuPrintFile(mb, map, timeNow);
                 }
 
@@ -353,24 +350,11 @@ public class Network {
                 timeNow += Cyc_time;
             }
 
-//            for (ManuBot mb : net.getManuList()) {
-//                net.generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
-//            }
-
             Ultilis.dumpFinal(net);
 
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-//            try {
-//                net.detailWriter.close();
-//                net.shelvesWriter.close();
-//                net.gateOutWriter.close();
-//                net.generalWriter.close();
-//            } catch (IOException e) {
-//                System.out.println("Failed to close file");
-//                e.printStackTrace();
-//            }
             Ultilis.closeFile();
         }
 

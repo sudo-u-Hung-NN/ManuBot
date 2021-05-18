@@ -54,9 +54,15 @@ public class Ultilis {
 
     public static void dumpFinal(Network network) {
         try {
+//            for (TaskShelf tsh : network.getShelfList()) {
+//                generalWriter
+//            }
+
             for (ManuBot mb : network.getManuList()) {
                 generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
             }
+            generalWriter.write(String.format("Number of task remains: %d\nNumber of arrival task: %d\nNumber of request task: %d\n",
+                    network.TaskList.size(), network.getArrivalListSize(), network.getActiveListSize()));
         } catch (Exception e) {
             e.printStackTrace();
         }

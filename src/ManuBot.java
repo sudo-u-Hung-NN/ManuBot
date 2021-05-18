@@ -155,18 +155,26 @@ public class ManuBot { // Manufacture robot
                 assert ECperSec == 0: "Invalid charging energy called";
                 this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
                 this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
+                System.out.println("IV. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + ", going location x = " +this.charger.getLocation().getX() +
+                        ", y = " + charger.getLocation().getY() + "), node type = " + map.point2node(charger.getLocation()).getType());
             }
             else if (this.chargingTimeLeft == 0 && t) {
-                Task currtask = this.workList.get(0);
-                System.out.println("I. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
-                        ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
-                Node currentNode = map.point2node(locationNow);
-                Node destination = map.point2node(this.workList.get(0).getNextStop());
-                getPath(currentNode, destination, map);
-                moving(this.pathNodeList.get(0), net, map, timeNow);
+                if (!this.workList.isEmpty()) {
+                    Task currtask = this.workList.get(0);
+                    System.out.println("I. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.getID() + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
+                            ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
+                    Node currentNode = map.point2node(locationNow);
+                    Node destination = map.point2node(this.workList.get(0).getNextStop());
+                    getPath(currentNode, destination, map);
+                    moving(this.pathNodeList.get(0), net, map, timeNow);
+                }
             }
             else if (this.chargingTimeLeft > 0 && !t) {
-                getPath(map.point2node(this.getLocationNow()), map.point2node(this.charger.getLocation()) , map);
+                Node currentNode = map.point2node(locationNow);
+                Node destination = map.point2node(this.charger.getLocation());
+                getPath(currentNode, destination, map);
+                System.out.println("III. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + ", going location x = " +this.charger.getLocation().getX() +
+                        ", y = " + charger.getLocation().getY() + "), node type = " + map.point2node(charger.getLocation()).getType());
                 moving(this.pathNodeList.get(0), net, map, timeNow);
             }
             else {
