@@ -62,7 +62,7 @@ public class ManuBot { // Manufacture robot
 
     // Update energy status
     public void setResEnergy(double resEnergy){
-        this.ResEnergy = resEnergy;
+        this.ResEnergy = Math.min(resEnergy, InitEnergy);
     }
 
     public Double getResEnergy() {
@@ -168,6 +168,9 @@ public class ManuBot { // Manufacture robot
                     getPath(currentNode, destination, map);
                     moving(this.pathNodeList.get(0), net, map, timeNow);
                 }
+                else {
+                    this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
+                }
             }
             else if (this.chargingTimeLeft > 0 && !t) {
                 Node currentNode = map.point2node(locationNow);
@@ -234,6 +237,7 @@ public class ManuBot { // Manufacture robot
                 output = chgr;
             }
         }
+        assert output != null : "Can not find Charger!";
         return output;
     }
 

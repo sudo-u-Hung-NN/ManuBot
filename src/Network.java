@@ -284,18 +284,15 @@ public class Network {
 
                 // For each task in Queue yeu cau, assign to autobots
                 for (Task tks: net.ActiveTaskQueue){
-                    if (tks.announced == false) {
-                        GateOut gateOut = net.GateOutList.get(tks.getGateOut());
-                        System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
-                        int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
-                        if (AutoBotID < 0) {
-                            taskActiveRemain.add(tks);
-                            continue;
-                        }
-                        ManuBot mb = net.ManuList.get(AutoBotID);
-                        mb.workList.add(tks);
-                        tks.announced = true;
+                    GateOut gateOut = net.GateOutList.get(tks.getGateOut());
+//                    System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
+                    int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
+                    if (AutoBotID < 0) {
+                        taskActiveRemain.add(tks);
+                        continue;
                     }
+                    ManuBot mb = net.ManuList.get(AutoBotID);
+                    mb.workList.add(tks);
                 }
 
                 // Run gate
@@ -334,8 +331,10 @@ public class Network {
 
                 // Running autoBot in amount of time equals cycle time
                 for (ManuBot mb : net.ManuList) {
-                    mb.Running(net, map, Cyc_time, timeNow);
-                    Ultilis.manuPrintFile(mb, map, timeNow);
+                    if (mb.isFunctional()) {
+                        mb.Running(net, map, Cyc_time, timeNow);
+                        Ultilis.manuPrintFile(mb, map, timeNow);
+                    }
                 }
 
                 net.ActiveTaskQueue.clear();

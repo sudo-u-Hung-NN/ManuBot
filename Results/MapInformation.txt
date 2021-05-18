@@ -4,9 +4,10 @@ Number of nodes: 1002001
 VirtualM map size: 500.0
 Number of time step total: 80000.0
 Map detail
-[   0, 1000]. CHARGER	
-[ 200,  400]. SHELF	[ 200,  600]. SHELF	
+[   0,    0]. CHARGER	[   0,  500]. CHARGER	[   0, 1000]. CHARGER	
+[ 250,  300]. SHELF	[ 250,  600]. SHELF	
 [ 300,    0]. GATE_OUT	[ 300, 1000]. GATE_IN	
-[ 600,  800]. SHELF	
+[ 500,    0]. CHARGER	[ 500,  300]. SHELF	[ 500,  600]. SHELF	[ 500, 1000]. CHARGER	
 [ 700,    0]. GATE_OUT	[ 700, 1000]. GATE_IN	
-[1000,    0]. CHARGER	[1000, 1000]. CHARGER	
+[ 750,  300]. SHELF	[ 750,  600]. SHELF	
+[1000,    0]. CHARGER	[1000,  500]. CHARGER	[1000, 1000]. CHARGER	
