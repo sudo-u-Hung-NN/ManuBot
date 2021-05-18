@@ -7,6 +7,7 @@ public class Ultilis {
     public static FileWriter generalWriter;
     public static FileWriter shelvesWriter;
     public static FileWriter gateOutWriter;
+    public static FileWriter chargerWriter;
 
     public static List<FileWriter> manubotWriter = new LinkedList<>();
 
@@ -29,8 +30,20 @@ public class Ultilis {
             gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
             gateOutWriter.write("Time\tGID\tBotID\tRTaskID\tTotal\n");
 
+            chargerWriter = new FileWriter("Results/ChargerDetail.csv");
+            chargerWriter.write("Time\tCID\tXcord\tYcord\tBotID\tEnergy\n");
+
         } catch (IOException e) {
             System.out.println("Failed to open file!");
+            e.printStackTrace();
+        }
+    }
+
+    public static void chargerPrintFile(ManuBot mb, Charger ch, double timeNow) {
+        try {
+            chargerWriter.write(String.format("%.2f\t%d\t%.2f\t%.2f\t%d\t%.5f\n",
+                    timeNow, ch.getID(), ch.getLocation().getX(), ch.getLocation().getY(), mb.getId(), mb.getResEnergy()));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -54,10 +67,6 @@ public class Ultilis {
 
     public static void dumpFinal(Network network) {
         try {
-//            for (TaskShelf tsh : network.getShelfList()) {
-//                generalWriter
-//            }
-
             for (ManuBot mb : network.getManuList()) {
                 generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
             }
@@ -77,6 +86,7 @@ public class Ultilis {
             shelvesWriter.close();
             gateOutWriter.close();
             generalWriter.close();
+            chargerWriter.close();
         } catch (IOException e) {
             System.out.println("Failed to close file");
             e.printStackTrace();

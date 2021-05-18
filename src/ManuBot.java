@@ -107,14 +107,12 @@ public class ManuBot { // Manufacture robot
                     if (network.isActive(this.workList.get(0))){
                         System.out.println("AutoBot come to get task");
                         network.deleteActiveTask(this.workList.get(0));
-//                        checkShelf.getTaskList().remove(this.workList.get(0));
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
                     else {
                         // Case2: come to store task
                         System.out.println("AutoBot come to store task");
-//                        checkShelf.getTaskList().add(this.workList.get(0));
                         checkShelf.store2Shelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.remove(0);
                     }
@@ -153,6 +151,7 @@ public class ManuBot { // Manufacture robot
             boolean t = map.point2node(this.getLocationNow()).isAtCharger();
             if (this.chargingTimeLeft > 0 && t) {
                 assert ECperSec == 0: "Invalid charging energy called";
+                Ultilis.chargerPrintFile(this, charger, timeNow);
                 this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
                 this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
                 System.out.println("IV. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + ", going location x = " +this.charger.getLocation().getX() +
