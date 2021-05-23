@@ -74,8 +74,14 @@ public class Ultilis {
             for (ManuBot mb : network.getManuList()) {
                 generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
             }
-            generalWriter.write(String.format("Number of task remains: %d\nNumber of arrival task: %d\nNumber of request task: %d\n",
-                    network.TaskList.size(), network.getArrivalListSize(), network.getActiveListSize()));
+            generalWriter.write(String.format("Number of arrival task: %d\nNumber of request task: %d\n",
+                    network.getArrivalListSize(), network.getActiveListSize()));
+
+            int total = 0;
+            for (TaskShelf tsh :network.getShelfList()) {
+                total += tsh.getTaskList().size();
+            }
+            generalWriter.write(String.format("Number of task in shelves: %d\n",total));
         } catch (Exception e) {
             e.printStackTrace();
         }

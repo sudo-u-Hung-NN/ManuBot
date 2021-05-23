@@ -4,16 +4,16 @@ import java.util.List;
 
 public class ManuBot { // Manufacture robot
     private int ID;
-    private double speed = Config.getInstance().getAsDouble("speed");
+    private final double speed = Config.getInstance().getAsDouble("speed");
     private point locationNow;
     private point destination;
-    private double InitEnergy = Config.getInstance().getAsDouble("init_energy");      // Energy at the start   (J)
+    private final double InitEnergy = Config.getInstance().getAsDouble("init_energy");      // Energy at the start   (J)
     private double ResEnergy;       // Energy at the moment  (J)
-    private double ThshEnergy = Config.getInstance().getAsDouble("energy_threshold");      // Below this value is considered at dangerous stage  (J)
-    private double ERperSec = Config.getInstance().getAsDouble("resting_energy");        // Energy to operate per Second at Westing stage  (J/s)
-    private double EWperSec = Config.getInstance().getAsDouble("working_energy");        // Energy to operate per Second at Working state  (J/s)
-    private boolean isAdaptive = Config.getInstance().getAsBoolean("adaptive_charging");         // False if manual determining the percentage charging
-    private double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
+    private final double ThshEnergy = Config.getInstance().getAsDouble("energy_threshold");      // Below this value is considered at dangerous stage  (J)
+    private final double ERperSec = Config.getInstance().getAsDouble("resting_energy");        // Energy to operate per Second at Westing stage  (J/s)
+    private final double EWperSec = Config.getInstance().getAsDouble("working_energy");        // Energy to operate per Second at Working state  (J/s)
+    private final boolean isAdaptive = Config.getInstance().getAsBoolean("adaptive_charging");         // False if manual determining the percentage charging
+    private final double ChargeLevel = Config.getInstance().getAsDouble("fixed_energy_charge_level");
     public List<Task> workList = new ArrayList<>(); // List of works
     public List<Node> pathNodeList = new ArrayList<>(); // List of point indicate path trajectories
     private double chargingTimeLeft = 0;

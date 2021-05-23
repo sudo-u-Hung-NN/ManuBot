@@ -2,7 +2,7 @@ Map size: 1000
 Factory size: 500
 Number of nodes: 1002001
 VirtualM map size: 500.0
-Number of time step total: 80000.0
+Number of time step total: 128000.0
 Map detail
 [   0,    0]. CHARGER	[   0,  500]. CHARGER	[   0, 1000]. CHARGER	
 [ 250,  300]. SHELF	[ 250,  600]. SHELF	
