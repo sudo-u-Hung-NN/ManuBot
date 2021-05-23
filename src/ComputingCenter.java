@@ -347,19 +347,34 @@ public class ComputingCenter {
      * @return id of the chosen autoBot
      */
     public int getAutoBotFromXTY(Network net, point PointX, point PointY){
-        int chooseID1 = -1;             // The uncharged manubot can go to gate
-        int chooseID2 = -1;             // The charging manubot can complete task
-        int chooseID3 = -1;             // The charging manubot can go to gate
-        double minEstimateTime1 = 100;
-        double minEstimateTime2 = 100;
-        double minEstimateTime3 = 100;
+        // thứ tự ưu tiên:  Không sạc và đủ năng lượng đi lấy hàng và chuyển hàng
+        //                  Không sạc và đi được đến cổng(hoặc ngăn chứa)
+//                          Đang sạc và đủ năng lượng hoàn thành lấy hàng và chuyển hàng
+//                          đang sạc và chỉ đủ đến cổng
+//                          trả về -1
+
+        int[] chooseID = new int[4];
+        double[] optimalEnergy = new double[4];
+        for (int  i = 0; i < 4; i++){
+            chooseID[i] = -1;
+            optimalEnergy[i] = 0.0;
+        }
+//        int chooseID = -1;              // The uncharged manubot can complete task
+//        int chooseID1 = -1;             // The uncharged manubot can go to gate
+//        int chooseID2 = -1;             // The charging manubot can complete task
+//        int chooseID3 = -1;             // The charging manubot can go to gate
+//        double optimalEnergy = 0;       // Optimize time that uncharged manubot can complete task
+//        double optimalEnergy1 = 0;
+//        double optimalEnergy2 = 0;
+//        double optimalEnergy3 = 0;
+
         for(ManuBot mb: net.getManuList()) {
             if (!mb.workList.isEmpty()){
 //                System.out.println(mb.getId());
                 continue;
             }
             double lengthTX = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
-            double lengthXTY = PointX.getLength(PointY)*1.302;                  // length from gate to shelf
+            double lengthXTY = PointX.getLength(PointY)*1.302;                      // length from gate to shelf
             double estimateTimeX = lengthTX / mb.getSpeed();                             // estimate time to Gate
             double estimateTimeY = lengthXTY / mb.getSpeed();
 //            System.out.println("1.TX: " + lengthTX);
@@ -368,33 +383,44 @@ public class ComputingCenter {
 //            System.out.println("EY: " + estimateTimeY);
 //            System.out.println(mb.getResEnergy());
 //            System.out.println(((estimateTimeX + estimateTimeY) * mb.getERperSec()));
-            if (mb.getResEnergy() >= (estimateTimeX + estimateTimeY) * mb.getERperSec()) {           // Manubot can take task and complete mission
-                if (mb.getChargingTimeLeft() == 0.0){
-                    return mb.getId();
-                }
-                if (minEstimateTime2 > estimateTimeX + estimateTimeY) {
-                    chooseID2 = mb.getId();
-                    minEstimateTime2 = estimateTimeX + estimateTimeY;
-                }
-            }
-            if (mb.getResEnergy() >= (estimateTimeX)*mb.getERperSec()){
-                if (mb.getChargingTimeLeft() == 0){
-                    if (minEstimateTime1 < estimateTimeX){
-                        chooseID1 = mb.getId();
-                        minEstimateTime1 = estimateTimeX;
+            double energyCompleteTask = estimateTimeX * mb.getERperSec() + estimateTimeY * mb.getEWperSec();
+            double diffEnergyComTask = (mb.getResEnergy() - energyCompleteTask) * 0.8;
+
+            double energyGetTask = estimateTimeX * mb.getERperSec();
+            double diffEnergyGetTask = mb.getResEnergy() - energyGetTask;
+            if (diffEnergyComTask >= 0) {                                                   // Manubot can take task and complete mission
+                if (mb.getChargingTimeLeft() == 0) {                                      // Neu robot khong sac thi se di lay hang
+                    if (diffEnergyComTask > optimalEnergy[0]){
+                        chooseID[0] = mb.getId();
+                        optimalEnergy[0] = diffEnergyComTask;
                     }
                 }
-                else if (minEstimateTime3 > estimateTimeX) {
-                    chooseID3 = mb.getId();
-                    minEstimateTime3 = estimateTimeX;
+
+                if (diffEnergyComTask > optimalEnergy[2]) {
+                    chooseID[2] = mb.getId();
+                    optimalEnergy[2] = diffEnergyComTask;
+                }
+            }
+            if (diffEnergyGetTask >= 0){
+                if (mb.getChargingTimeLeft() == 0){
+                    if (diffEnergyGetTask > optimalEnergy[1]){
+                        chooseID[1] = mb.getId();
+                        optimalEnergy[1] = diffEnergyGetTask;
+                    }
+                }
+                if (diffEnergyGetTask > optimalEnergy[3]) {
+                    chooseID[3] = mb.getId();
+                    optimalEnergy[3] = diffEnergyGetTask;
                 }
             }
         }
-        if (chooseID1 != -1)
-            return chooseID1;
-        if (chooseID2 != -1)
-            return chooseID2;
-        return chooseID3;
+        if (chooseID[0] != -1)
+            return chooseID[0];
+        if (chooseID[1] != -1)
+            return chooseID[1];
+        if (chooseID[2] != -1)
+            return chooseID[2];
+        return chooseID[3];
     }
 
     // Timing section

@@ -48,8 +48,8 @@ public class TaskShelf {
         );
     }
 
-    public void Running(){
-
+    public boolean isContain(Task tsk) {
+        return this.TaskList.contains(tsk);
     }
 
     // Constructor

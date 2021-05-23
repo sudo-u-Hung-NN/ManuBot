@@ -104,7 +104,7 @@ public class ManuBot { // Manufacture robot
                 System.out.println("AutoBot is at shelf");
                 if (checkShelf != null){
                     // Case1: come to get task
-                    if (network.isActive(this.workList.get(0))){
+                    if (network.isActive(this.workList.get(0)) && checkShelf.isContain(this.workList.get(0))) {
                         System.out.println("AutoBot come to get task");
                         network.deleteActiveTask(this.workList.get(0));
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
