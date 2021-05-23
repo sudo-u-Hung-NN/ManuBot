@@ -8,6 +8,7 @@ public class Ultilis {
     public static FileWriter shelvesWriter;
     public static FileWriter gateOutWriter;
     public static FileWriter chargerWriter;
+    public static FileWriter test_getAutoBot;
 
     public static List<FileWriter> manubotWriter = new LinkedList<>();
 
@@ -30,8 +31,11 @@ public class Ultilis {
             gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
             gateOutWriter.write("Time\tGID\tBotID\tRTaskID\tTotal\n");
 
-            chargerWriter = new FileWriter("Results/ChargerDetail.csv");
+            chargerWriter = new FileWriter("Results/ChargerDetail.csv", false);
             chargerWriter.write("Time\tCID\tXcord\tYcord\tBotID\tEnergy\n");
+
+            test_getAutoBot = new FileWriter("Test/testgetAutoBot.csv", false);
+            test_getAutoBot.write("Time\tTaskID\tAutoBotID\n");
 
         } catch (IOException e) {
             System.out.println("Failed to open file!");
@@ -87,6 +91,7 @@ public class Ultilis {
             gateOutWriter.close();
             generalWriter.close();
             chargerWriter.close();
+            test_getAutoBot.close();
         } catch (IOException e) {
             System.out.println("Failed to close file");
             e.printStackTrace();

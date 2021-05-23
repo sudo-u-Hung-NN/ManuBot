@@ -285,14 +285,16 @@ public class Network {
                 // For each task in Queue yeu cau, assign to autobots
                 for (Task tks: net.ActiveTaskQueue){
                     GateOut gateOut = net.GateOutList.get(tks.getGateOut());
-//                    System.out.println("Task id{" + tks.getID() +"} will be delivered to Gate_out id {" + tks.getGateOut() + "}");
                     int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
                     if (AutoBotID < 0) {
                         taskActiveRemain.add(tks);
-                        continue;
                     }
-                    ManuBot mb = net.ManuList.get(AutoBotID);
-                    mb.workList.add(tks);
+                    else {
+                        ManuBot mb = net.ManuList.get(AutoBotID);
+                        mb.workList.add(tks);
+                        Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\n",
+                                timeNow, tks.getID(), mb.getId()));
+                    }
                 }
 
                 // Run gate

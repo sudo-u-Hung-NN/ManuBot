@@ -156,15 +156,15 @@ public class Map {
 		// Get CloseList of the manubot
 		List<Node> closeList = this.closeListDictionary.get(mb.getId());
 
-		double currentDist = currentNode.getLength(destination);
-		System.out.println(String.format("Current distance to destination (%.2f, %.2f) type %s: %.5f",
-				destination.getX(),destination.getY(), destination.getType(), currentDist));
+//		double currentDist = currentNode.getLength(destination);
+//		System.out.println(String.format("Current distance to destination (%.2f, %.2f) type %s: %.5f",
+//				destination.getX(),destination.getY(), destination.getType(), currentDist));
 		Node nextNode = null;
 		System.out.print("Neighbor (x, y) = ");
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
 		}
-		currentDist = 1000;
+		double currentDist = 1000;
 		System.out.print("\nConsidering: ");
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
@@ -173,8 +173,7 @@ public class Map {
 				closeList.clear();
 				return near;
 			}
-			// !closeList.contains(near) &&
-			else if (near.isWalkable()) {
+			else if (!closeList.contains(near) && near.isWalkable()) {
 				double neighborDist = near.getLength(destination);
 				System.out.print(String.format("\t%.4f V", neighborDist));
 				if (currentDist >= neighborDist) {
