@@ -35,7 +35,7 @@ public class Ultilis {
             chargerWriter.write("Time\tCID\tXcord\tYcord\tBotID\tEnergy\n");
 
             test_getAutoBot = new FileWriter("Test/testgetAutoBot.csv", false);
-            test_getAutoBot.write("Time\tTaskID\tAutoBotID\n");
+            test_getAutoBot.write("Time\tTaskID\tAutoBotID\tPurpose\n");
 
         } catch (IOException e) {
             System.out.println("Failed to open file!");
@@ -74,8 +74,8 @@ public class Ultilis {
             for (ManuBot mb : network.getManuList()) {
                 generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
             }
-            generalWriter.write(String.format("Number of arrival task: %d\nNumber of request task: %d\n",
-                    network.getArrivalListSize(), network.getActiveListSize()));
+            generalWriter.write(String.format("Total Task: %d\nNumber of arrival task: %d\nNumber of request task: %d\n",
+                    network.getTaskID(), network.getArrivalListSize(), network.getActiveListSize()));
 
             int total = 0;
             for (TaskShelf tsh :network.getShelfList()) {

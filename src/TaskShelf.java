@@ -39,7 +39,6 @@ public class TaskShelf {
         file.write(String.format("%.2f\t%d\t%d\t%d\t%d\t%s\n",
                 timeNow, this.ID, this.TaskList.size(), tsk.getID(), mb.getId(), "RECV")
         );
-
     }
 
     public void takeFromShelf(ManuBot mb, FileWriter file, double timeNow, Task tsk) throws IOException {

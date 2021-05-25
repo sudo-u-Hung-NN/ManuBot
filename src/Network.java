@@ -63,6 +63,10 @@ public class Network {
     private List<Task> ArrivalTaskQueue; // Queue Sinh
     private List<Task> ActiveTaskQueue;  // Queue Yeu cau
 
+    public List<Task> getActiveTaskQueue() {
+        return ActiveTaskQueue;
+    }
+
     // Objects interact section
     public void insertChargerList(Charger chgr) {
         this.ChargerList.add(chgr);
@@ -273,6 +277,7 @@ public class Network {
                         if (tks.isActive(timeNow)) {
                             System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
                             activeNow.add(tks);
+                            net.ArrivalTaskQueue.remove(tks);
                             iter.remove();
                         }
                     }
@@ -293,7 +298,8 @@ public class Network {
                     else {
                         ManuBot mb = net.ManuList.get(AutoBotID);
                         mb.workList.add(tks);
-                        Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\n",
+                        net.ArrivalTaskQueue.remove(tks);
+                        Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tACTIVE\n",
                                 timeNow, tks.getID(), mb.getId()));
                     }
                 }
@@ -319,16 +325,18 @@ public class Network {
                         // If found a shelf that is not full
                         int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
 
-//                    tks.setNextStop(net.getShelfList().get(shelfID).getLocation());
                         tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
 
                         if (AutoBotID < 0){
                             taskArriveRemain.add(tks);
-                            continue;
                         }
-                        ManuBot mb = net.ManuList.get(AutoBotID);
-                        mb.workList.add(tks);
-                        System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
+                        else {
+                            ManuBot mb = net.ManuList.get(AutoBotID);
+                            mb.workList.add(tks);
+                            System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
+                            Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tARRIVE\n",
+                                    timeNow, tks.getID(), mb.getId()));
+                        }
                     }
                 }
 

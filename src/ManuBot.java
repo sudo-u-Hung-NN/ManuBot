@@ -111,7 +111,8 @@ public class ManuBot { // Manufacture robot
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
-                    else {
+                    else if (this.workList.get(0).getNextStop().getX() == this.getLocationNow().getX() &&
+                            this.workList.get(0).getNextStop().getY() == this.getLocationNow().getY()) {
                         // Case2: come to store task
                         System.out.println("AutoBot come to store task");
                         checkShelf.store2Shelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
