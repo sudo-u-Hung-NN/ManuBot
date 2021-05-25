@@ -126,6 +126,7 @@ public class Network {
 
     // Get task that is active by insert its ID
     public void getArrivalTask(Task tsk) {
+        tsk.withAutoBot = true;
         this.ArrivalTaskQueue.remove(tsk);
     }
 

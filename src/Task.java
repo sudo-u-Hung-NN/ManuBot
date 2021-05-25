@@ -11,7 +11,7 @@ public class Task {
     private point nextStop;
     private point shelfLocation;
     public boolean isActive = false;
-    public boolean announced = false;
+    public boolean withAutoBot = false;
 
     public point getShelfLocation() {
         return shelfLocation;

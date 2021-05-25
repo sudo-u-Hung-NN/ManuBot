@@ -87,7 +87,7 @@ public class ManuBot { // Manufacture robot
             case GATE_IN:
                 network.getArrivalTask(this.workList.get(0));
                 assert this.workList.get(0) != null: "Invalid remove task";
-                this.isTransporting *= -1;
+                this.isTransporting = 1;
                 this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
                 System.out.println("AutoBot id{" + this.getId() + "} at gate in, now goes to a shelf.");
                 break;
@@ -97,7 +97,7 @@ public class ManuBot { // Manufacture robot
                 assert !this.workList.isEmpty() : "Error, Work list is empty";
                 checkGateOut.recieveTask(this.workList.get(0), this, Ultilis.gateOutWriter, timeNow);
                 this.workList.remove(0);
-                this.isTransporting *= -1;
+                this.isTransporting = -1;
                 break;
             case SHELF:
                 TaskShelf checkShelf = network.amIatShelf(getLocationNow());
@@ -105,6 +105,7 @@ public class ManuBot { // Manufacture robot
                 if (checkShelf != null){
                     // Case1: come to get task
                     if (network.isActive(this.workList.get(0)) && checkShelf.isContain(this.workList.get(0))) {
+                        this.isTransporting = 1;
                         System.out.println("AutoBot come to get task");
                         network.deleteActiveTask(this.workList.get(0));
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
@@ -115,8 +116,8 @@ public class ManuBot { // Manufacture robot
                         System.out.println("AutoBot come to store task");
                         checkShelf.store2Shelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.remove(0);
+                        this.isTransporting = -1;
                     }
-                    this.isTransporting *= -1;
                 }
                 break;
             case CHARGER:
@@ -154,6 +155,9 @@ public class ManuBot { // Manufacture robot
                 Ultilis.chargerPrintFile(this, charger, timeNow);
                 this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
                 this.chargingTimeLeft = Math.max(this.chargingTimeLeft - cycleTime, 0);
+                if (this.getResEnergy() == this.InitEnergy) {
+                    this.chargingTimeLeft = 0;
+                }
                 System.out.println("IV. AutoBot id{" + this.getId() + "}, Energy: " + this.getResEnergy() + ", going location x = " +this.charger.getLocation().getX() +
                         ", y = " + charger.getLocation().getY() + "), node type = " + map.point2node(charger.getLocation()).getType());
             }
@@ -252,7 +256,7 @@ public class ManuBot { // Manufacture robot
             return 0;
         }
         else{
-            return (this.InitEnergy * this.ChargeLevel - this.ResEnergy) / chgr.getECperSec();
+            return (this.InitEnergy * this.ChargeLevel - this.ResEnergy) / (chgr.getECperSec() - this.EWperSec);
         }
     }
 

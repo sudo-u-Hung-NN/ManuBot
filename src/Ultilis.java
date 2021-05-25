@@ -60,7 +60,7 @@ public class Ultilis {
                             timeNow, mb.getId(), mb.getLocationNow().getX(), mb.getLocationNow().getY(),
                             mb.getResEnergy(), mb.isTransporting, map.point2node(mb.getLocationNow()).getType(),
                             mb.workList.isEmpty() ? "REST" : map.point2node(mb.workList.get(0).getNextStop()).getType(),
-                            mb.workList.isEmpty() ? 0 : mb.workList.get(0).getID(),
+                            mb.workList.isEmpty() ? -1 : mb.workList.get(0).getID(),
                             mb.workList.isEmpty() ? "NaN" : mb.workList.get(0).isActive)
             );
         } catch (Exception e) {

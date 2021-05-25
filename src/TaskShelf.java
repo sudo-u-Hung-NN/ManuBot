@@ -35,6 +35,7 @@ public class TaskShelf {
 
     public void store2Shelf(ManuBot mb, FileWriter file, double timeNow, Task tsk) throws IOException {
         this.TaskList.add(tsk);
+        tsk.withAutoBot = false;
         file.write(String.format("%.2f\t%d\t%d\t%d\t%d\t%s\n",
                 timeNow, this.ID, this.TaskList.size(), tsk.getID(), mb.getId(), "RECV")
         );
@@ -43,6 +44,7 @@ public class TaskShelf {
 
     public void takeFromShelf(ManuBot mb, FileWriter file, double timeNow, Task tsk) throws IOException {
     	this.TaskList.remove(tsk);
+    	tsk.withAutoBot = true;
         file.write(String.format("%.2f\t%d\t%d\t%d\t%d\t%s\n",
                 timeNow, this.ID, this.TaskList.size(), tsk.getID(), mb.getId(), "GIV")
         );
