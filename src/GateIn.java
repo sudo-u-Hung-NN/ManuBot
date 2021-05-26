@@ -64,7 +64,7 @@ public class GateIn {
     // Methods
     public void Running(Network net, double timeNow, int numGateOut){
             if (timeNow >= getMakeTaskTime()){
-                Task nt = new Task(net.getTaskID(), timeNow, numGateOut); // nt: new task
+                Task nt = new Task(timeNow, numGateOut); // nt: new task
                 nt.setNextStop(this.location);
                 net.insertArrivalTaskQueue(nt);
                 setTaskInterval();

@@ -75,7 +75,7 @@ public class Ultilis {
                 generalWriter.write(String.format("%d\t%.2f\n", mb.getId(), mb.getResEnergy()));
             }
             generalWriter.write(String.format("Total Task: %d\nNumber of arrival task: %d\nNumber of request task: %d\n",
-                    network.getTaskID(), network.getArrivalListSize(), network.getActiveListSize()));
+                    Task.numTask, network.getArrivalListSize(), network.getActiveListSize()));
 
             int total = 0;
             for (TaskShelf tsh :network.getShelfList()) {

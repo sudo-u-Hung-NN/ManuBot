@@ -88,7 +88,13 @@ public class ManuBot { // Manufacture robot
                 network.getArrivalTask(this.workList.get(0));
                 assert this.workList.get(0) != null: "Invalid remove task";
                 this.isTransporting = 1;
-                this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
+                this.workList.get(0).withAutoBot = true;
+//                if (this.workList.get(0).isActive) {
+//                    this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
+//                }
+//                else {
+                    this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
+//                }
                 System.out.println("AutoBot id{" + this.getId() + "} at gate in, now goes to a shelf.");
                 break;
             case GATE_OUT:

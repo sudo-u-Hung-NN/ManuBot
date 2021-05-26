@@ -139,10 +139,6 @@ public class Network {
         return factorySize;
     }
 
-    public int getTaskID() {
-        this.numTaskTotal += 1;
-        return this.numTaskTotal;
-    }
 
     public boolean isAllShelvesFull() {
         for (TaskShelf tsh : this.ShelfList) {
@@ -261,48 +257,47 @@ public class Network {
         System.out.println(LocalDate.now() + "; " + LocalTime.now());
         System.out.println("Starting Simulation...");
 
-        List<Task> taskActiveRemain = new ArrayList<>();
-        List<Task> taskArriveRemain = new ArrayList<>();
+        List<Integer> GiveAwayList = new LinkedList<>();
+
         try {
             while (timeNow < Sim_time){
                 System.out.println("===========================================");
                 System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
 
                 // For all tasks, check if any are activated
-                {
-                    Iterator<Task> iter = net.TaskList.listIterator();
-                    List<Task> activeNow = new ArrayList<>();
-                    while (iter.hasNext()) {
-                        Task tks = iter.next();
-                        if (tks.isActive(timeNow)) {
-                            System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
-                            activeNow.add(tks);
-                            net.ArrivalTaskQueue.remove(tks);
-                            iter.remove();
-                        }
+                Iterator<Task> iter = net.TaskList.listIterator();
+                while (iter.hasNext()) {
+                    Task tks = iter.next();
+                    if (tks.isActive(timeNow)) {
+                        System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
+                        net.ActiveTaskQueue.add(tks);
+                        net.ArrivalTaskQueue.remove(tks);
+                        iter.remove();
                     }
-                    if (activeNow.size() > 0) {
-                        System.out.println("Add to ActiveTaskQueue");
-                        net.ActiveTaskQueue.addAll(activeNow);
-                    }
-                    activeNow.clear();
                 }
 
-                // For each task in Queue yeu cau, assign to autobots
-                for (Task tks: net.ActiveTaskQueue){
+                // For all tasks in ActiveQueue, find them an autoBot
+                iter = net.ActiveTaskQueue.listIterator();
+                while (iter.hasNext()) {
+                    Task tks = iter.next();
                     GateOut gateOut = net.GateOutList.get(tks.getGateOut());
                     int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), gateOut.getLocation());
-                    if (AutoBotID < 0) {
-                        taskActiveRemain.add(tks);
-                    }
-                    else {
+                    if (AutoBotID >= 0) {
                         ManuBot mb = net.ManuList.get(AutoBotID);
                         mb.workList.add(tks);
-                        net.ArrivalTaskQueue.remove(tks);
+                        if (!GiveAwayList.contains(tks.getID())) {
+                            GiveAwayList.add(tks.getID());
+                        }
+                        else {
+                            System.out.println("Already active once");
+                            System.exit(100);
+                        }
                         Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tACTIVE\n",
                                 timeNow, tks.getID(), mb.getId()));
+                        iter.remove();
                     }
                 }
+
 
                 // Run gate
                 for( GateIn gts: net.GateInList ){
@@ -310,32 +305,29 @@ public class Network {
                 }
 
                 // For each task in Queue sinh, assign to autobots
-                for ( Task tks: net.ArrivalTaskQueue ){
-                    // If all shelves are full, then do nothing, wait until next cycleTime
-                    if (net.isAllShelvesFull()){
-                        taskArriveRemain.addAll(net.ArrivalTaskQueue);
-                    }
-                    else{
-                        // If some shelves are not full, then find them
+
+                iter = net.ArrivalTaskQueue.listIterator();
+                while (iter.hasNext()) {
+                    Task tks = iter.next();
+                    if (!net.isAllShelvesFull()) {
                         int shelfID = -1;
+                        int count = 0;
                         do {
                             Random rand = new Random();
                             shelfID = rand.nextInt(net.getNumShelf());
-                        }while (net.getShelfList().get(shelfID).isFull());
-                        // If found a shelf that is not full
-                        int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
-
-                        tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
-
-                        if (AutoBotID < 0){
-                            taskArriveRemain.add(tks);
-                        }
-                        else {
-                            ManuBot mb = net.ManuList.get(AutoBotID);
-                            mb.workList.add(tks);
-                            System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
-                            Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tARRIVE\n",
-                                    timeNow, tks.getID(), mb.getId()));
+                            count ++;
+                        }while (net.getShelfList().get(shelfID).isFull() && count < 10);
+                        if (count < 10) {
+                            int AutoBotID = brain.getAutoBotFromXTY(net, tks.getNextStop(), net.getShelfList().get(shelfID).getLocation());
+                            tks.setShelfLocation(net.getShelfList().get(shelfID).getLocation());
+                            if (AutoBotID >= 0){
+                                ManuBot mb = net.ManuList.get(AutoBotID);
+                                mb.workList.add(tks);
+                                System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
+                                Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tARRIVE\n",
+                                        timeNow, tks.getID(), mb.getId()));
+                                iter.remove();
+                            }
                         }
                     }
                 }
@@ -348,14 +340,14 @@ public class Network {
                     }
                 }
 
-                net.ActiveTaskQueue.clear();
-                net.ArrivalTaskQueue.clear();
-
-                net.ActiveTaskQueue.addAll(taskActiveRemain);
-                net.ArrivalTaskQueue.addAll(taskArriveRemain);
-
-                taskActiveRemain.clear();
-                taskArriveRemain.clear();
+//                net.ActiveTaskQueue.clear();
+//                net.ArrivalTaskQueue.clear();
+//
+//                net.ActiveTaskQueue.addAll(taskActiveRemain);
+//                net.ArrivalTaskQueue.addAll(taskArriveRemain);
+//
+//                taskActiveRemain.clear();
+//                taskArriveRemain.clear();
 
                 timeNow += Cyc_time;
             }

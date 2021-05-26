@@ -13,6 +13,8 @@ public class Task {
     public boolean isActive = false;
     public boolean withAutoBot = false;
 
+    public static int numTask = 0;
+
     public point getShelfLocation() {
         return shelfLocation;
     }
@@ -73,8 +75,9 @@ public class Task {
     }
 
     // Constructor
-    public Task(int ID, double timeNow, int numGateOut){
-        setID(ID);
+    public Task(double timeNow, int numGateOut){
+        Task.numTask ++;
+        setID(Task.numTask);
         setActivateTime(timeNow);
         setGateOut(numGateOut);
     }
