@@ -1,16 +1,15 @@
 import java.util.Random;
 
-public class Task {
-    private int ID;
+public class Task extends ManuObject implements Timed{
     private double activateTime;
-    private int gateOutID;
     private String rangeRandom = Config.getInstance().getAsString("Task_active_range");
     private String[] bound = rangeRandom.split(";");
     private double lowerBound = Double.parseDouble(bound[0]);
     private double ranging = Double.parseDouble(bound[1]);
+
+    private int gateOutID;
     private point nextStop;
     private point shelfLocation;
-    public boolean isActive = false;
     public boolean withAutoBot = false;
 
     public static int numTask = 0;
@@ -31,14 +30,6 @@ public class Task {
         this.nextStop = nextStop;
     }
 
-    public double getLowerBound() {
-        return lowerBound;
-    }
-
-    public double getRanging() {
-        return ranging;
-    }
-
     public int getGateOut() {
         return this.gateOutID;
     }
@@ -49,29 +40,16 @@ public class Task {
         this.gateOutID = rand.nextInt(numGateOut);
     }
 
+    @Override
     public void setActivateTime(double now) {
         Random rand = new Random();
-        double deltaT = rand.nextDouble()*getRanging()+getLowerBound(); // this give a number ranging from 300 to 400
+        double deltaT = rand.nextDouble()*ranging + lowerBound; // this give a number ranging from 300 to 400
         this.activateTime = now + deltaT;
     }
 
-    public double getActivateTime() {
-        return activateTime;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
-    public int getID() {
-        return ID;
-    }
-
-    public boolean isActive(double timeNow){
-        if (timeNow >= getActivateTime()) {
-            isActive = true;
-        }
-        return isActive;
+    @Override
+    public boolean activate(double timeNow) {
+        return  timeNow >= activateTime;
     }
 
     // Constructor

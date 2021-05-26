@@ -137,7 +137,7 @@ public class Map {
 	public void map4bot(List<ManuBot> ManuList) {
 		for (ManuBot mb : ManuList) {
 			List<Node> closeList = new ArrayList<>();
-			this.closeListDictionary.put(mb.getId(), closeList);
+			this.closeListDictionary.put(mb.getID(), closeList);
 		}
 	}
 	/**
@@ -154,7 +154,7 @@ public class Map {
 //		Node destination = point2node(mb.workList.get(0).getNextStop());
 
 		// Get CloseList of the manubot
-		List<Node> closeList = this.closeListDictionary.get(mb.getId());
+		List<Node> closeList = this.closeListDictionary.get(mb.getID());
 
 //		double currentDist = currentNode.getLength(destination);
 //		System.out.println(String.format("Current distance to destination (%.2f, %.2f) type %s: %.5f",

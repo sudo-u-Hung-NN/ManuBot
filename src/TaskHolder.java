@@ -4,7 +4,7 @@ import java.util.List;
 
 public class TaskHolder extends ManuObject{
     protected List<Task> TaskList = new ArrayList<>(); /* Storing tasks */
-    protected final int MAX_CAPACITY = 100;
+    protected final int MAX_CAPACITY = Config.getInstance().getAsInteger("Shelf_capacity");
 
     protected void insertTaskList(Task tk){
         if (TaskList.size() == MAX_CAPACITY){
@@ -13,12 +13,20 @@ public class TaskHolder extends ManuObject{
         this.TaskList.add(tk);
     }
 
+    protected List<Task> getTaskList() {
+        return this.TaskList;
+    }
+
     protected boolean isEmpty(){
         return this.TaskList.size() == 0;
     }
 
     protected boolean isFull(){
         return this.TaskList.size() == MAX_CAPACITY;
+    }
+
+    protected boolean isContain(Task tsk) {
+        return this.TaskList.contains(tsk);
     }
 
     protected Task popTask(int TaskID){
@@ -33,15 +41,4 @@ public class TaskHolder extends ManuObject{
         this.TaskList.remove(found);
         return found;
     }
-
-//    public static void main(String[] args) {
-//        TaskHolder th = new TaskHolder();
-//        th.insertTaskList(new Task(3, 0, 6));
-//        th.insertTaskList(new Task(5, 0, 6));
-//        th.insertTaskList(new Task(2, 0, 6));
-//        th.insertTaskList(new Task(9, 0, 6));
-//        Task x = th.popTask(5);
-//        System.out.println(th.TaskList.size());
-//        System.out.println(x.getGateOut());
-//    }
 }

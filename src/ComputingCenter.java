@@ -253,20 +253,13 @@ public class ComputingCenter {
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
 
-    public double TargetFunction(Network network, double mu, double currentEnergy, int k) {
-        double deltaSE = DeltaSigmaEnergy(network, currentEnergy, mu);
-        double deltaAE = DeltaAverageEnergy(network, mu, k);
-        double taskDR = TaskDoneRate(network);
-
-        return deltaAE - deltaSE + taskDR;
-    }
-
     public void printDictionary() {
         System.out.println("Printing Computation values ...");
         Enumeration<String> keys = this.variables.keys();
         for (; keys.hasMoreElements();){
             String E = keys.nextElement();
             System.out.println(E + " = " + this.variables.get(E));
+
         }
         System.out.println("Done printing dictionary");
     }
@@ -370,10 +363,10 @@ public class ComputingCenter {
 
         for(ManuBot mb: net.getManuList()) {
             if (!mb.workList.isEmpty()){
-//                System.out.println(mb.getId());
+//                System.out.println(mb.getID());
                 continue;
             }
-            double lengthTX = mb.getLocationNow().getLength(PointX)*1.302;          // length from current manubot's location to Gate
+            double lengthTX = mb.getLocation().getLength(PointX)*1.302;          // length from current manubot's location to Gate
             double lengthXTY = PointX.getLength(PointY)*1.302;                      // length from gate to shelf
             double estimateTimeX = lengthTX / mb.getSpeed();                             // estimate time to Gate
             double estimateTimeY = lengthXTY / mb.getSpeed();
@@ -391,25 +384,25 @@ public class ComputingCenter {
             if (diffEnergyComTask >= 0) {                                                   // Manubot can take task and complete mission
                 if (mb.getChargingTimeLeft() == 0) {                                      // Neu robot khong sac thi se di lay hang
                     if (diffEnergyComTask > optimalEnergy[0]){
-                        chooseID[0] = mb.getId();
+                        chooseID[0] = mb.getID();
                         optimalEnergy[0] = diffEnergyComTask;
                     }
                 }
 
                 if (diffEnergyComTask > optimalEnergy[2]) {
-                    chooseID[2] = mb.getId();
+                    chooseID[2] = mb.getID();
                     optimalEnergy[2] = diffEnergyComTask;
                 }
             }
             if (diffEnergyGetTask >= 0){
                 if (mb.getChargingTimeLeft() == 0){
                     if (diffEnergyGetTask > optimalEnergy[1]){
-                        chooseID[1] = mb.getId();
+                        chooseID[1] = mb.getID();
                         optimalEnergy[1] = diffEnergyGetTask;
                     }
                 }
                 if (diffEnergyGetTask > optimalEnergy[3]) {
-                    chooseID[3] = mb.getId();
+                    chooseID[3] = mb.getID();
                     optimalEnergy[3] = diffEnergyGetTask;
                 }
             }
@@ -430,23 +423,50 @@ public class ComputingCenter {
         int k = network.getChargingList().size();
         double Etb = AverageEnergy(network);
 
-        double Rk = (NA * Etb + k * mu_bar * EC)*(2 * P_tb - EC * 1.0/NA) - EC * mb.getResEnergy();
-        assert Rk > 0;
-
-        double Uk = (NA - 1) * Math.pow(P_tb, 2) + Math.pow(EC - P_tb, 2) - Math.pow(EC*1.0/NA - P_tb, 2);
-        assert Uk > 0;
+//        double Rk = (NA * Etb + k * mu_bar * EC)*(2 * P_tb - EC * 1.0/NA) - EC * mb.getResEnergy();
+//        if (Rk <= 0) {
+//            System.out.println("False Rk computed");
+//            System.exit(8);
+//        }
+//
+//        double Uk = (NA - 1) * Math.pow(P_tb, 2) + Math.pow(EC - P_tb, 2) - Math.pow(EC*1.0/NA - P_tb, 2);
+//        if (Uk <= 0) {
+//            System.out.println("False Uk computed");
+//            System.exit(9);
+//        }
 
         // "Gradient" Descent
-        double mu_atsk = Rk/Uk;
+//        double mu_atsk = Rk/Uk;
+        double mu_atsk = 30;
         double deltaF = 0;
         double F_old = this.TargetFunction(network, mu_atsk, mb.getResEnergy(), k);
         while (deltaF >= 0 && mu_atsk >= cycleTime) {
             double F_new = this.TargetFunction(network, mu_atsk - cycleTime, mb.getResEnergy(), k);
-            deltaF = F_old - F_new;
+            deltaF = F_new - F_old;
             mu_atsk = mu_atsk - cycleTime;
             F_old = F_new;
         }
 
+        if (mu_atsk <= 0) {
+            System.out.println("getChargingTime return false !");
+            System.exit(10);
+        }
+        // Print to file
+//        try {
+//            Ultilis.test_SCA.write(String.format("%.3f\t%.3f\t%.3f\t%.3f\t%.3f\t%d\t%.3f\n",
+//                    mb.getResEnergy(), Rk, Uk, Rk/Uk, Etb, k, mu_atsk));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
         return mu_atsk;
+    }
+
+    public double TargetFunction(Network network, double mu, double currentEnergy, int k) {
+//        double deltaSE = DeltaSigmaEnergy(network, currentEnergy, mu);
+        double deltaAE = DeltaAverageEnergy(network, mu, k);
+        double taskDR = TaskDoneRate(network);
+
+        return deltaAE + taskDR;
     }
 }
