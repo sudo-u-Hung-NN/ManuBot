@@ -340,14 +340,6 @@ public class Network {
                     }
                 }
 
-//                net.ActiveTaskQueue.clear();
-//                net.ArrivalTaskQueue.clear();
-//
-//                net.ActiveTaskQueue.addAll(taskActiveRemain);
-//                net.ArrivalTaskQueue.addAll(taskArriveRemain);
-//
-//                taskActiveRemain.clear();
-//                taskArriveRemain.clear();
 
                 timeNow += Cyc_time;
             }

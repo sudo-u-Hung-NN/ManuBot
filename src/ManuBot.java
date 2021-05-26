@@ -73,8 +73,31 @@ public class ManuBot { // Manufacture robot
         return chargingTimeLeft;
     }
 
-    public void moving(point nextNode, Network network, Map map, double timeNow) throws IOException
-    {
+    private void validate(Map map) {
+        if (!this.workList.isEmpty()) {
+            switch (map.point2node(this.workList.get(0).getNextStop()).getType()) {
+                case GATE_IN:
+                    assert this.isTransporting == -1 : "Invalid moving purpose to gate in";
+                    break;
+                case GATE_OUT:
+                    assert this.isTransporting == 1 : "Invalid moving purpose to gate out";
+                    break;
+                case SHELF:
+                    if (this.workList.get(0).withAutoBot) {
+                        assert this.isTransporting == 1 : "Invalid moving purpose to shelf 1";
+                    }
+                    else {
+                        assert this.isTransporting == -1 : "Invalid moving purpose to shelf 2";
+                    }
+                    break;
+                case NONE:
+                case CHARGER:
+                    break;
+            }
+        }
+    }
+
+    public void moving(point nextNode, Network network, Map map, double timeNow) throws IOException {
         if (nextNode == null) {
             System.out.println("Here in moving, wrong");
         }
@@ -89,12 +112,7 @@ public class ManuBot { // Manufacture robot
                 assert this.workList.get(0) != null: "Invalid remove task";
                 this.isTransporting = 1;
                 this.workList.get(0).withAutoBot = true;
-//                if (this.workList.get(0).isActive) {
-//                    this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
-//                }
-//                else {
-                    this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
-//                }
+                this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
                 System.out.println("AutoBot id{" + this.getId() + "} at gate in, now goes to a shelf.");
                 break;
             case GATE_OUT:
@@ -155,6 +173,7 @@ public class ManuBot { // Manufacture robot
     public void Running(Network net, Map map, double cycleTime, double timeNow) throws IOException{
         if (this.isFunctional()) {
             //boolean t = net.amIatCharger(this.getLocationNow()) == null;
+            validate(map);
             System.out.println("AutoBot id{" + this.getId() +"} is at (x, y) = (" + this.locationNow.getX() +", " + this.locationNow.getY() +
                     "), current node type: " + map.point2node(this.locationNow).getType());
 
