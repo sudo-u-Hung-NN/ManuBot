@@ -2,7 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class GateOut extends ManuObject {
-    private static int count = 0;
+    public static int count = 0;
 
     public void recieveTask(Task tsk, ManuBot mb, FileWriter file, double timeNow) throws IOException {
         count ++;

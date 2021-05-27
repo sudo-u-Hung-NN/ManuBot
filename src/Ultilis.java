@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -11,6 +12,13 @@ public class Ultilis {
     public static FileWriter test_getAutoBot;
     public static FileWriter test_SCA;
 
+    public static final String generalFile = Config.getInstance().getAsString("generalFile");
+    public static final String shelvesFile = Config.getInstance().getAsString("shelfFile");
+    public static final String gateOutFile = Config.getInstance().getAsString("gateOutFile");
+    public static final String chargerFile = Config.getInstance().getAsString("chargerFile");
+    public static final String getAutoBotFile = Config.getInstance().getAsString("getAutoBotFile");
+    public static final String SCAFile = Config.getInstance().getAsString("SCAFile");
+
     public static List<FileWriter> manubotWriter = new LinkedList<>();
 
     public static void initFiles(Network network) {
@@ -23,22 +31,21 @@ public class Ultilis {
                 manubotWriter.add(manuWriter);
             }
 
-            generalWriter = new FileWriter("Results/General1.text", false);
-            generalWriter.write("BotID\tEnergy\n");
+            generalWriter = new FileWriter(generalFile, true);
 
-            shelvesWriter = new FileWriter("Results/ShelvesDetail.csv", false);
+            shelvesWriter = new FileWriter(shelvesFile, false);
             shelvesWriter.write("Time\tSID\tLSize\tRTaskID\tBotID\tMode\n");
 
-            gateOutWriter = new FileWriter("Results/GateOutDetail.csv", false);
+            gateOutWriter = new FileWriter(gateOutFile, false);
             gateOutWriter.write("Time\tGID\tBotID\tRTaskID\tTotal\n");
 
-            chargerWriter = new FileWriter("Results/ChargerDetail.csv", false);
+            chargerWriter = new FileWriter(chargerFile, false);
             chargerWriter.write("Time\tCID\tXcord\tYcord\tBotID\tEnergy\n");
 
-            test_getAutoBot = new FileWriter("Test/testgetAutoBot.csv", false);
+            test_getAutoBot = new FileWriter(getAutoBotFile, false);
             test_getAutoBot.write("Time\tTaskID\tAutoBotID\tPurpose\n");
 
-            test_SCA = new FileWriter("Test/testSCA.csv", false);
+            test_SCA = new FileWriter(SCAFile, false);
             test_SCA.write("ResEnergy\tRk\tUk\tmu_greedy\tE_tb\tk\tmu_aterisk\n");
 
         } catch (IOException e) {
@@ -76,19 +83,32 @@ public class Ultilis {
     public static void dumpFinal(Network network) {
         try {
             double sum = 0;
+            int dead = 0;
             for (ManuBot mb : network.getManuList()) {
-                generalWriter.write(String.format("%d\t%.2f\n", mb.getID(), mb.getResEnergy()));
                 sum += mb.isFunctional() ? mb.getResEnergy() : 0;
+                if (!mb.isFunctional()) {
+                    dead += 1;
+                }
             }
 
-            generalWriter.write(String.format("Average energy: %.2f\nTotal Task: %d\nNumber of arrival task: %d\nNumber of request task: %d\n",
-                    sum/network.getManuList().size(),Task.numTask, network.getArrivalListSize(), network.getActiveListSize()));
+            generalWriter.write(String.format(
+                    "%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%d\t%d\t%.2f\n",
+                    network.getManuList().size(),
+                    network.getGateInList().size(),
+                    network.getGateOutList().size(),
+                    network.getShelfList().size(),
+                    network.getChargerList().size(),
+                    Config.getInstance().getAsDouble("fixed_energy_charge_level"),
+                    Double.parseDouble(Config.getInstance().getAsString("Gate_task_range").split(";")[0]),
+                    Double.parseDouble(Config.getInstance().getAsString("Task_active_range").split(";")[0]),
+                    Config.getInstance().getAsDouble("Factory_size"),
+                    Config.getInstance().getAsInteger("Map_size"),
+                    Config.getInstance().getAsInteger("Simulation_time"),
+                    GateOut.count,
+                    dead,
+                    sum/network.getManuList().size()
+            ));
 
-            int total = 0;
-            for (TaskShelf tsh :network.getShelfList()) {
-                total += tsh.getTaskList().size();
-            }
-            generalWriter.write(String.format("Number of task in shelves: %d\n",total));
         } catch (Exception e) {
             e.printStackTrace();
         }

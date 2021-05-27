@@ -102,30 +102,8 @@ public class Network {
         return this.ActiveTaskQueue.size();
     }
 
-    public void insertActiveTaskQueue(Task nt) {
-        this.ActiveTaskQueue.add(nt);
-    }
-
-    public boolean isNewTask() {
-        return this.ArrivalTaskQueue.isEmpty();
-    }
-
-    public boolean isRequesting() {
-        return this.ActiveTaskQueue.isEmpty();
-    }
-
     public int getNumShelf() {
         return this.ShelfList.size();
-    }
-
-    // Get task that is active by insert its ID
-    public Task getActiveTask(int ID) {
-        for (Task i : this.ActiveTaskQueue) {
-            if (i.getID() == ID) {
-                return i;
-            }
-        }
-        return null;
     }
 
     // Get task that is active by insert its ID
@@ -138,7 +116,6 @@ public class Network {
     public int getFactorySize() {
         return factorySize;
     }
-
 
     public boolean isAllShelvesFull() {
         for (TaskShelf tsh : this.ShelfList) {
