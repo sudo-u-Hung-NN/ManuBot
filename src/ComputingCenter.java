@@ -224,9 +224,9 @@ public class ComputingCenter {
      * @param mu: the time in the future we wish to look ahead
      * @return the change in the standard energy deviation
      */
-//    public double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
-//        return MuSigmaEnergy(network, currentEnergy, mu) - NowSigmaEnergy(network);
-//    }
+    public double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
+        return MuSigmaEnergy(network, currentEnergy, mu) - NowSigmaEnergy(network);
+    }
 
     /**
      * @author Nguyen Nang Hung
