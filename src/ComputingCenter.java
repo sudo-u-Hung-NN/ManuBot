@@ -224,7 +224,7 @@ public class ComputingCenter {
      * @param mu: the time in the future we wish to look ahead
      * @return the change in the standard energy deviation
      */
-    public double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
+    private double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
         return MuSigmaEnergy(network, currentEnergy, mu) - NowSigmaEnergy(network);
     }
 
@@ -232,7 +232,7 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return the change in average energy of a network
      */
-    public double DeltaAverageEnergy(Network net, double mu, int k){
+    private double DeltaAverageEnergy(Network net, double mu, int k){
         double EC = net.ChargerList.get(0).getECperSec();
         int NA = net.getManuList().size();
         if (NA == 0){
@@ -248,12 +248,12 @@ public class ComputingCenter {
      * @param net
      * @return F(n, k)
      */
-    public double TaskDoneRate(Network net){
+    private double TaskDoneRate(Network net){
         int k = net.getChargingList().size();
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
 
-    public void printDictionary() {
+    private void printDictionary() {
         System.out.println("Printing Computation values ...");
         Enumeration<String> keys = this.variables.keys();
         for (; keys.hasMoreElements();){
@@ -265,7 +265,7 @@ public class ComputingCenter {
     }
 
     // Constructor
-    public ComputingCenter(Network network){
+    private ComputingCenter(Network network){
         this.variables = new Hashtable<>();
 
         this.P_tb = this.AverageWattage(network);
@@ -298,35 +298,35 @@ public class ComputingCenter {
 
     // Getter
 
-    public double getP_tb() {
+    private double getP_tb() {
         return P_tb;
     }
 
-    public double getEC() {
+    private double getEC() {
         return EC;
     }
 
-    public double getAverageLength_GiTS() {
+    private double getAverageLength_GiTS() {
         return AverageLength_GiTS;
     }
 
-    public double getAverageLength_STGo() {
+    private double getAverageLength_STGo() {
         return AverageLength_STGo;
     }
 
-    public double getAverageLength_STS() {
+    private double getAverageLength_STS() {
         return AverageLength_STS;
     }
 
-    public double getAverageLength_GiTGo() {
+    private double getAverageLength_GiTGo() {
         return AverageLength_GiTGo;
     }
 
-    public double getAverageWorkTrip() {
+    private double getAverageWorkTrip() {
         return AverageWorkTrip;
     }
 
-    public double getAverageTimeTrip() {
+    private double getAverageTimeTrip() {
         return AverageTimeTrip;
     }
 
@@ -462,7 +462,7 @@ public class ComputingCenter {
         return mu_atsk;
     }
 
-    public double TargetFunction(Network network, double mu, double currentEnergy, int k) {
+    private double TargetFunction(Network network, double mu, double currentEnergy, int k) {
 //        double deltaSE = DeltaSigmaEnergy(network, currentEnergy, mu);
         double deltaAE = DeltaAverageEnergy(network, mu, k);
         double taskDR = TaskDoneRate(network);
