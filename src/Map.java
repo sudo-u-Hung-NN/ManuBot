@@ -205,7 +205,6 @@ public class Map {
 
 	public void setStartPoint(point startPoint) {
 		this.startPoint = this.point2node(startPoint);
-		this.startPoint.setG(0);
 		
 	}
 
@@ -215,7 +214,6 @@ public class Map {
 
 	public void setEndPoint(point endPoint) {
 		this.endPoint = this.point2node(endPoint);
-		this.endPoint.setH(0);
 	}
 
 	public Node[][] getMap() {
