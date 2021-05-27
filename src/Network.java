@@ -102,30 +102,8 @@ public class Network {
         return this.ActiveTaskQueue.size();
     }
 
-    public void insertActiveTaskQueue(Task nt) {
-        this.ActiveTaskQueue.add(nt);
-    }
-
-    public boolean isNewTask() {
-        return this.ArrivalTaskQueue.isEmpty();
-    }
-
-    public boolean isRequesting() {
-        return this.ActiveTaskQueue.isEmpty();
-    }
-
     public int getNumShelf() {
         return this.ShelfList.size();
-    }
-
-    // Get task that is active by insert its ID
-    public Task getActiveTask(int ID) {
-        for (Task i : this.ActiveTaskQueue) {
-            if (i.getID() == ID) {
-                return i;
-            }
-        }
-        return null;
     }
 
     // Get task that is active by insert its ID
@@ -138,7 +116,6 @@ public class Network {
     public int getFactorySize() {
         return factorySize;
     }
-
 
     public boolean isAllShelvesFull() {
         for (TaskShelf tsh : this.ShelfList) {
@@ -174,10 +151,6 @@ public class Network {
         }
         System.out.println(String.format("Location input (%.2f,%.2f) found no shelf", location.getX(), location.getY()));
         return null;
-    }
-
-    public boolean isActive(Task tsk) {
-        return tsk.isActive;
     }
 
     public void deleteActiveTask(Task tsk) {
@@ -231,7 +204,6 @@ public class Network {
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
 
-
     }
 
     public static void main(String[] args) {
@@ -260,7 +232,8 @@ public class Network {
         List<Integer> GiveAwayList = new LinkedList<>();
 
         try {
-            while (timeNow < Sim_time){
+            int check = 1;
+            while (timeNow < Sim_time && check == 1){
                 System.out.println("===========================================");
                 System.out.println("Time step: " + Math.round(timeNow/Cyc_time));
 
@@ -268,7 +241,7 @@ public class Network {
                 Iterator<Task> iter = net.TaskList.listIterator();
                 while (iter.hasNext()) {
                     Task tks = iter.next();
-                    if (tks.isActive(timeNow)) {
+                    if (tks.activate(timeNow)) {
                         System.out.println("Active: task id {" + tks.getID() + "} at time:" + timeNow);
                         net.ActiveTaskQueue.add(tks);
                         net.ArrivalTaskQueue.remove(tks);
@@ -293,7 +266,7 @@ public class Network {
                             System.exit(100);
                         }
                         Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tACTIVE\n",
-                                timeNow, tks.getID(), mb.getId()));
+                                timeNow, tks.getID(), mb.getID()));
                         iter.remove();
                     }
                 }
@@ -323,9 +296,9 @@ public class Network {
                             if (AutoBotID >= 0){
                                 ManuBot mb = net.ManuList.get(AutoBotID);
                                 mb.workList.add(tks);
-                                System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getId() + "} to Shelf id{" + shelfID + "}");
+                                System.out.println("Assigned task id{" + tks.getID() +"} to AutoBot id {" + mb.getID() + "} to Shelf id{" + shelfID + "}");
                                 Ultilis.test_getAutoBot.write(String.format("%.2f\t%d\t%d\tARRIVE\n",
-                                        timeNow, tks.getID(), mb.getId()));
+                                        timeNow, tks.getID(), mb.getID()));
                                 iter.remove();
                             }
                         }
@@ -333,13 +306,19 @@ public class Network {
                 }
 
                 // Running autoBot in amount of time equals cycle time
+                int botLive = 0;
                 for (ManuBot mb : net.ManuList) {
                     if (mb.isFunctional()) {
-                        mb.Running(net, map, Cyc_time, timeNow);
+                        mb.Running(net, map, Cyc_time, timeNow, brain);
                         Ultilis.manuPrintFile(mb, map, timeNow);
+                        botLive ++;
                     }
                 }
 
+                if (botLive == 0) {
+                    System.out.println("All bot is non-functional");
+                    check = 0;
+                }
 
                 timeNow += Cyc_time;
             }

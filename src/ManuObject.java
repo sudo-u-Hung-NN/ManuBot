@@ -1,12 +1,12 @@
-public class ManuObject {
+public class ManuObject implements Active{
     protected int objectId;
     protected point location;
 
-    public int getObjectId() {
+    public int getID() {
         return objectId;
     }
 
-    public void setObjectId(int objectId) {
+    public void setID(int objectId) {
         this.objectId = objectId;
     }
 
@@ -17,4 +17,7 @@ public class ManuObject {
     public void setLocation(point location) {
         this.location = location;
     }
+
+    @Override
+    public void Running() {}
 }
