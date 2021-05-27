@@ -28,7 +28,7 @@ public class GateOut {
         file.write(String.format("%.2f\t%d\t%d\t%d\t%d\n",
                 timeNow, this.gateID, mb.getId(), tsk.getID(), GateOut.count));
     }
-
+    //hello
     // Constructor
     public GateOut(int ID, point X){
         setGateID(ID);
