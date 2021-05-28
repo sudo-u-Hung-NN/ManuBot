@@ -18,6 +18,8 @@ public class Network {
     private String Shelf_xcord = Config.getInstance().getAsString("Shelf_xcord");
     private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
+    public final int mapSize = Config.getInstance().getAsInteger("Map_size");
+    private final double distance = (double) (factorySize*1.0 / mapSize);
     public static double Cyc_time;
 
     // Objects list section
@@ -130,7 +132,7 @@ public class Network {
 
     public GateOut amIatGateOut(Node location) {
         for (GateOut gto : this.GateOutList) {
-            if (Math.abs(gto.getLocation().getX() - location.getX()) < 0.001 && Math.abs(gto.getLocation().getY() - location.getY()) < 0.001)
+            if (Math.abs(gto.getLocation().getX() - location.getX()) < distance && Math.abs(gto.getLocation().getY() - location.getY()) < distance)
                 return gto;
         }
         return null;
@@ -138,7 +140,7 @@ public class Network {
 
     public TaskShelf amIatShelf(Node location) {
         for (TaskShelf shf : this.ShelfList) {
-            if (Math.abs(shf.getLocation().getX() - location.getX()) < 0.001 && Math.abs(shf.getLocation().getY() - location.getY()) < 0.001) {
+            if (Math.abs(shf.getLocation().getX() - location.getX()) < distance && Math.abs(shf.getLocation().getY() - location.getY()) < distance) {
                 System.out.println("Here at shelf");
                 return shf;
             }
