@@ -1,12 +1,10 @@
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
 public class Network {
-    private int numTaskTotal = 0;
+//    private int numTaskTotal = 0;
     private int numManubot = Config.getInstance().getAsInteger("ManuBot_quantity");
     private int factorySize = Config.getInstance().getAsInteger("Factory_size");
     private String Gate_xcord_in = Config.getInstance().getAsString("Gate_xcord_in");
@@ -18,8 +16,8 @@ public class Network {
     private String Shelf_xcord = Config.getInstance().getAsString("Shelf_xcord");
     private String Shelf_ycord = Config.getInstance().getAsString("Shelf_ycord");
     public static double Sim_time = Config.getInstance().getAsDouble("Simulation_time");
-    public final int mapSize = Config.getInstance().getAsInteger("Map_size");
-    private final double distance = (double) (factorySize*1.0 / mapSize);
+//    public final int mapSize = Config.getInstance().getAsInteger("Map_size");
+//    private final double distance = (double) (factorySize*1.0 / mapSize);
     public static double Cyc_time;
 
     // Objects list section
@@ -130,17 +128,17 @@ public class Network {
 
     
 
-    public GateOut amIatGateOut(Node location) {
+    public GateOut amIatGateOut(Node location, Map map) {
         for (GateOut gto : this.GateOutList) {
-            if (Math.abs(gto.getLocation().getX() - location.getX()) < distance && Math.abs(gto.getLocation().getY() - location.getY()) < distance)
+            if (Math.abs(map.point2node(gto.getLocation()).getX() - location.getX()) < 0.001 && Math.abs(map.point2node(gto.getLocation()).getY() - location.getY()) < 0.001)
                 return gto;
         }
         return null;
     }
 
-    public TaskShelf amIatShelf(Node location) {
+    public TaskShelf amIatShelf(Node location, Map map) {
         for (TaskShelf shf : this.ShelfList) {
-            if (Math.abs(shf.getLocation().getX() - location.getX()) < distance && Math.abs(shf.getLocation().getY() - location.getY()) < distance) {
+            if (Math.abs(map.point2node(shf.getLocation()).getX() - location.getX()) < 0.001 && Math.abs(map.point2node(shf.getLocation()).getY() - location.getY()) < 0.001) {
                 System.out.println("Here at shelf");
                 return shf;
             }

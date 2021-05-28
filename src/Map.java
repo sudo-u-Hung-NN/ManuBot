@@ -161,7 +161,7 @@ public class Map {
 		System.out.print("\nConsidering: ");
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
-			if ((Math.abs(near.getX() - destination.getX()) < 0.001 && Math.abs(near.getY() - destination.getY()) < 0.001)|| near.id == destination.id) {
+			if ((Math.abs(near.getX() - destination.getX()) < 0.001 && Math.abs(near.getY() - destination.getY()) < 0.001) || near.id == destination.id) {
 				System.out.println("\nReach destination\n");
 				closeList.clear();
 				return near;

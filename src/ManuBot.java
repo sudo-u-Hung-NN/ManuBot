@@ -107,7 +107,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                 System.out.println("AutoBot id{" + this.objectId + "} at gate in, now goes to a shelf.");
                 break;
             case GATE_OUT:
-                GateOut checkGateOut = network.amIatGateOut(location);
+                GateOut checkGateOut = network.amIatGateOut(location, map);
                 assert checkGateOut != null : "Gate out null pointer";
                 assert !this.workList.isEmpty() : "Error, Work list is empty";
                 if(this.isTransporting == 1) {
@@ -117,7 +117,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                 }
                 break;
             case SHELF:
-                TaskShelf checkShelf = network.amIatShelf(location);
+                TaskShelf checkShelf = network.amIatShelf(location, map);
                 System.out.println("AutoBot is at shelf");
                 if (checkShelf != null){
                     // Case1: come to get task
@@ -128,8 +128,9 @@ public class ManuBot extends ManuObject { // Manufacture robot
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
-                    else if (Math.abs(this.workList.get(0).getNextStop().getX() - this.location.getX()) < 0.001 &&
-                            Math.abs(this.workList.get(0).getNextStop().getY() - this.location.getY()) <0.001) {
+                    else  {
+//                        if (Math.abs(map.point2node(this.workList.get(0).getNextStop()).getX() - this.location.getX()) < 0.001 &&
+//                                Math.abs(map.point2node(this.workList.get(0).getNextStop()).getY() - this.location.getY()) < 0.001 )
                         // Case2: come to store task
                         System.out.println("AutoBot come to store task");
                         checkShelf.store2Shelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
