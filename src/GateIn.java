@@ -1,9 +1,11 @@
 import java.util.Random;
 
 public class GateIn extends TaskHolder implements Timed {
-    private double makeTaskTime = 0;
+
     private final String rangeRandom = Config.getInstance().getAsString("Gate_task_range");
     private final String[] bound = rangeRandom.split(";");
+
+    private double makeTaskTime = 0;
     private final double lowerBound = Double.parseDouble(bound[0]);
     private final double ranging = Double.parseDouble(bound[1]);
 

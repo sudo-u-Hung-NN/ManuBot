@@ -224,7 +224,7 @@ public class ComputingCenter {
      * @param mu: the time in the future we wish to look ahead
      * @return the change in the standard energy deviation
      */
-    private double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
+    public double DeltaSigmaEnergy(Network network, double currentEnergy, double mu){
         return MuSigmaEnergy(network, currentEnergy, mu) - NowSigmaEnergy(network);
     }
 
@@ -232,7 +232,7 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return the change in average energy of a network
      */
-    private double DeltaAverageEnergy(Network net, double mu, int k){
+    public double DeltaAverageEnergy(Network net, double mu, int k){
         double EC = net.ChargerList.get(0).getECperSec();
         int NA = net.getManuList().size();
         if (NA == 0){
@@ -248,12 +248,12 @@ public class ComputingCenter {
      * @param net
      * @return F(n, k)
      */
-    private double TaskDoneRate(Network net){
+    public double TaskDoneRate(Network net){
         int k = net.getChargingList().size();
         return (net.getManuList().size() - k)/AverageTimeTrip(net);
     }
 
-    private void printDictionary() {
+    public void printDictionary() {
         System.out.println("Printing Computation values ...");
         Enumeration<String> keys = this.variables.keys();
         for (; keys.hasMoreElements();){
@@ -462,7 +462,7 @@ public class ComputingCenter {
         return mu_atsk;
     }
 
-    private double TargetFunction(Network network, double mu, double currentEnergy, int k) {
+    public double TargetFunction(Network network, double mu, double currentEnergy, int k) {
 //        double deltaSE = DeltaSigmaEnergy(network, currentEnergy, mu);
         double deltaAE = DeltaAverageEnergy(network, mu, k);
         double taskDR = TaskDoneRate(network);
