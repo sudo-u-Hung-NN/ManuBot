@@ -128,8 +128,8 @@ public class ManuBot extends ManuObject { // Manufacture robot
                         checkShelf.takeFromShelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));
                         this.workList.get(0).setNextStop(network.getGateOutList().get(this.workList.get(0).getGateOut()).getLocation());
                     }
-                    else if (this.workList.get(0).getNextStop().getX() == this.location.getX() &&
-                            this.workList.get(0).getNextStop().getY() == this.location.getY()) {
+                    else if (Math.abs(this.workList.get(0).getNextStop().getX() - this.location.getX()) < 0.001 &&
+                            Math.abs(this.workList.get(0).getNextStop().getY() - this.location.getY()) <0.001) {
                         // Case2: come to store task
                         System.out.println("AutoBot come to store task");
                         checkShelf.store2Shelf(this, Ultilis.shelvesWriter, timeNow, this.workList.get(0));

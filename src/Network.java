@@ -126,30 +126,25 @@ public class Network {
         return true;
     }
 
-    public GateIn amIatGateIn(point location) {
-        for (GateIn gti : this.GateInList) {
-            if (gti.getLocation().equals(location))
-                return gti;
-        }
-        return null;
-    }
+    
 
-    public GateOut amIatGateOut(point location) {
+    public GateOut amIatGateOut(Node location) {
         for (GateOut gto : this.GateOutList) {
-            if (gto.getLocation().equals(location))
+            if (Math.abs(gto.getLocation().getX() - location.getX()) < 0.001 && Math.abs(gto.getLocation().getY() - location.getY()) < 0.001)
                 return gto;
         }
         return null;
     }
 
-    public TaskShelf amIatShelf(point location) {
+    public TaskShelf amIatShelf(Node location) {
         for (TaskShelf shf : this.ShelfList) {
-            if (shf.getLocation().equals(location)) {
+            if (Math.abs(shf.getLocation().getX() - location.getX()) < 0.001 && Math.abs(shf.getLocation().getY() - location.getY()) < 0.001) {
                 System.out.println("Here at shelf");
                 return shf;
             }
         }
         System.out.println(String.format("Location input (%.2f,%.2f) found no shelf", location.getX(), location.getY()));
+        System.exit(0);
         return null;
     }
 
