@@ -14,11 +14,17 @@ public class ManuBot extends ManuObject { // Manufacture robot
     public List<Node> pathNodeList = new ArrayList<>(); // List of point indicate path trajectories
     private double chargingTimeLeft = 0;
     public int isTransporting = -1; // 1 if carring task and -1 if not
-//    private final List<Node> switchStateNodes;
     private Charger charger;
     private double ResEnergy;       // Energy at the momemomentnt  (J)
+    private Node location;
 
+    public Node getLocation() {
+        return location;
+    }
 
+    public void setLocation(Node location) {
+        this.location = location;
+    }
     // ************************************************************************************
     // Robot methods SECTION
 
@@ -81,13 +87,14 @@ public class ManuBot extends ManuObject { // Manufacture robot
         }
     }
 
-    public void moving(point nextNode, Network network, Map map, double timeNow) throws IOException {
+    public void moving(Node nextNode, Network network, Map map, double timeNow) throws IOException {
         if (nextNode == null) {
             System.out.println("Here in moving, wrong");
         }
         if (this.location.equals(nextNode)) {
             System.out.println("Already at the destination");
         }
+
         this.location = nextNode;
 
         switch (map.point2node(this.location).getType()){
@@ -177,9 +184,9 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     Task currtask = this.workList.get(0);
                     System.out.println("I. AutoBot id{" + this.objectId + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.objectId + "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                             ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
-                    Node currentNode = map.point2node(location);
+//                    Node currentNode = map.point2node(location);
                     Node destination = map.point2node(this.workList.get(0).getNextStop());
-                    getPath(currentNode, destination, map);
+                    getPath(location, destination, map);
                     moving(this.pathNodeList.get(0), net, map, timeNow);
                 }
                 else {
@@ -187,9 +194,9 @@ public class ManuBot extends ManuObject { // Manufacture robot
                 }
             }
             else if (this.chargingTimeLeft > 0 && !t) {
-                Node currentNode = map.point2node(location);
+//                Node currentNode = map.point2node(location);
                 Node destination = map.point2node(this.charger.getLocation());
-                getPath(currentNode, destination, map);
+                getPath(location, destination, map);
                 System.out.println("III. AutoBot id{" + this.objectId + "}, Energy: " + this.getResEnergy() + ", going location x = " +this.charger.getLocation().getX() +
                         ", y = " + charger.getLocation().getY() + "), node type = " + map.point2node(charger.getLocation()).getType());
                 moving(this.pathNodeList.get(0), net, map, timeNow);
@@ -203,14 +210,14 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     System.out.println("II. AutoBot id{" + this.objectId + "}, Energy: " + this.getResEnergy() + " doing task id{" + currtask.objectId +
                             "}, location: x = " + currtask.getNextStop().getX() + ", y = " +currtask.getNextStop().getY() +
                             ", Task next stop node type: " + map.point2node(currtask.getNextStop()).getType());
-                    Node currentNode = map.point2node(location);
+//                    Node currentNode = map.point2node(location);
                     Node destination = map.point2node(this.workList.get(0).getNextStop());
-                    if (currentNode.equals(destination)){
-                        moving(this.location, net, map, timeNow);
+                    if (location.equals(destination)){
+                        moving(location, net, map, timeNow);
                     }
                     if (!this.workList.isEmpty()) {
                         destination = map.point2node(this.workList.get(0).getNextStop());
-                        getPath(currentNode, destination, map);
+                        getPath(location, destination, map);
                         moving(this.pathNodeList.get(0), net, map, timeNow);
                     }
                 }
@@ -282,13 +289,17 @@ public class ManuBot extends ManuObject { // Manufacture robot
         // choose charger location
         this.charger = getCharger(net);
         // Find path to charging point
-        getPath(map.point2node(this.location), map.point2node(this.charger.getLocation()) , map);
+        getPath(location, map.point2node(this.charger.getLocation()) , map);
         // Determine charging time
         this.chargingTimeLeft = getChargeTime(this.charger, net, cycleTime, computingCenter);
         return this.charger.getECperSec();
     }
 
     public void getPath(Node startPoint, Node endPoint, Map map){
+        if (startPoint.getX() != location.getX() || startPoint.getY() != location.getY()) {
+            System.out.println("Error here getPath");
+            System.exit(150);
+        }
         this.pathNodeList.add(map.FindPath(startPoint, endPoint, this));
     }
 }

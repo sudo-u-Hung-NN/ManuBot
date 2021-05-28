@@ -7,9 +7,6 @@ public class Node extends point{
 	private boolean isWalkable = true;
 	private boolean isObstacle = false;
 	private List<Node> next = new ArrayList<>();
-	private double H;
-	private double G;
-	private double F;
 	private manuType type;
 	public int id;
 
@@ -59,24 +56,6 @@ public class Node extends point{
 	}
 	public void setNext(List<Node> next) {
 		this.next = next;
-	}
-	public double getH() {
-		return H;
-	}
-	public void setH(double h) {
-		H = h;
-	}
-	public double getG() {
-		return G;
-	}
-	public void setG(double g) {
-		G = g;
-	}
-	public double getF() {
-		return F;
-	}
-	public void setF(double f) {
-		F = f;
 	}
 
 	public boolean isObstacle() {

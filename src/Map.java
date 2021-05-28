@@ -5,20 +5,14 @@ import java.util.*;
 
 public class Map {
 	public static final int mapSize = Config.getInstance().getAsInteger("Map_size");
-	private Node map[][] = new Node[mapSize+1][mapSize+1];
-	private Node startPoint;
-	private Node endPoint;
-//	private List<Node> closeList =  new ArrayList<>();
-	private int minDistance = 0;
+	private final Node[][] map = new Node[mapSize+1][mapSize+1];
 	private static final int factorySize = Config.getInstance().getAsInteger("Factory_size");
 	private static final int speed = Config.getInstance().getAsInteger("speed");
 	private static final double simTime = Config.getInstance().getAsInteger("Simulation_time");
 	private static final double distance = (double) factorySize / mapSize;
-	private List<Node> switchStateNodes = new ArrayList<>();
+	private final List<Node> switchStateNodes = new ArrayList<>();
 
 	private HashMap<Integer, List<Node>> closeListDictionary = new HashMap<>();
-
-	private final String outputFile = "Results/MapInformation.txt";
 
 	public Node point2node(point input){
 		if (input == null) {
@@ -43,18 +37,29 @@ public class Map {
 				map[i][j].id = i * (mapSize + 1) + j;
 			}
 
-        for (TaskShelf tsh : network.getShelfList()){
-        	int nodeX = (int)(tsh.getLocation().getX()/distance);
-        	int nodeY = (int)(tsh.getLocation().getY()/distance);
+        for (TaskShelf tsh : network.getShelfList()) {
+			int nodeX = (int) (tsh.getLocation().getX() / distance);
+			int nodeY = (int) (tsh.getLocation().getY() / distance);
 
-        	map[nodeX][nodeY].setType(manuType.SHELF);
+			map[nodeX][nodeY].setType(manuType.SHELF);
 			map[nodeX][nodeY].setWalkable(false);
 			map[nodeX][nodeY].setObstacle(true);
 
 			switchStateNodes.add(map[nodeX][nodeY]);
+			System.out.println(String.format("Shelf at node (%d, %d)", nodeX, nodeY));
 		}
 
-        for (GateIn gti : network.getGateInList()){
+		for (Charger chr : network.getChargerList()){
+			int nodeX = (int)(chr.getLocation().getX()/distance);
+			int nodeY = (int)(chr.getLocation().getY()/distance);
+
+			map[nodeX][nodeY].setType(manuType.CHARGER);
+			map[nodeX][nodeY].setWalkable(false);
+			map[nodeX][nodeY].setObstacle(true);
+			System.out.println(String.format("Charger at node (%d, %d)", nodeX, nodeY));
+		}
+
+		for (GateIn gti : network.getGateInList()){
 			int nodeX = (int)(gti.getLocation().getX()/distance);
 			int nodeY = (int)(gti.getLocation().getY()/distance);
 
@@ -62,6 +67,7 @@ public class Map {
 			switchStateNodes.add(map[nodeX][nodeY]);
 			map[nodeX][nodeY].setWalkable(false);
 			map[nodeX][nodeY].setObstacle(true);
+			System.out.println(String.format("Gate In at node (%d, %d)", nodeX, nodeY));
 		}
 
 		for (GateOut gto : network.getGateOutList()){
@@ -72,15 +78,7 @@ public class Map {
 			switchStateNodes.add(map[nodeX][nodeY]);
 			map[nodeX][nodeY].setWalkable(false);
 			map[nodeX][nodeY].setObstacle(true);
-		}
-
-		for (Charger chr : network.getChargerList()){
-			int nodeX = (int)(chr.getLocation().getX()/distance);
-			int nodeY = (int)(chr.getLocation().getY()/distance);
-
-			map[nodeX][nodeY].setType(manuType.CHARGER);
-			map[nodeX][nodeY].setWalkable(false);
-			map[nodeX][nodeY].setObstacle(true);
+			System.out.println(String.format("Gate Out at node (%d, %d)", nodeX, nodeY));
 		}
 
 		for (int i = 0; i < mapSize+1; i++)
@@ -91,9 +89,7 @@ public class Map {
 				if (j - 1 >= 0 )
 					map[i][j].setNext(map[i][j-1]);
 				if (i + 1 < mapSize+1 )
-				{
-					map[i][j].setNext(map[i+1][j]);
-				}
+					map[i][j].getNext().add(map[i+1][j]);
 				if (j + 1 < mapSize+1)
 					map[i][j].getNext().add(map[i][j+1]);
 			}
@@ -108,6 +104,7 @@ public class Map {
 
 	public void printMapInformation(){
 		try {
+			String outputFile = "Results/MapInformation.txt";
 			FileWriter fileout = new FileWriter(outputFile, false);
 			fileout.write("Map size: " + mapSize + "\n");
 			fileout.write("Factory size: " + factorySize + "\n");
@@ -150,15 +147,11 @@ public class Map {
 	 */
 	public Node FindPath(Node currentNode, Node destination, ManuBot mb)
 	{
-//		Node currentNode = point2node(mb.getLocationNow());
-//		Node destination = point2node(mb.workList.get(0).getNextStop());
-
 		// Get CloseList of the manubot
 		List<Node> closeList = this.closeListDictionary.get(mb.getID());
 
-//		double currentDist = currentNode.getLength(destination);
-//		System.out.println(String.format("Current distance to destination (%.2f, %.2f) type %s: %.5f",
-//				destination.getX(),destination.getY(), destination.getType(), currentDist));
+		System.out.println(String.format("Here in Findpath, current location: (%.2f, %.2f)", currentNode.getX(), currentNode.getY()));
+
 		Node nextNode = null;
 		System.out.print("Neighbor (x, y) = ");
 		for (Node near: currentNode.getNext()) {
@@ -173,6 +166,7 @@ public class Map {
 				closeList.clear();
 				return near;
 			}
+			//
 			else if (!closeList.contains(near) && near.isWalkable()) {
 				double neighborDist = near.getLength(destination);
 				System.out.print(String.format("\t%.4f V", neighborDist));
@@ -192,42 +186,5 @@ public class Map {
 		System.out.println(String.format("\nFindPath: next go to this location: (%.2f, %.2f)\n", nextNode.getX(), nextNode.getY()));
 		closeList.add(currentNode);
 		return nextNode;
-	}
-	
-	public int getMinDistance()
-	{
-		return this.minDistance;
-	}
-
-	public Node getStartPoint() {
-		return startPoint;
-	}
-
-	public void setStartPoint(point startPoint) {
-		this.startPoint = this.point2node(startPoint);
-		this.startPoint.setG(0);
-		
-	}
-
-	public Node getEndPoint() {
-		return endPoint;
-	}
-
-	public void setEndPoint(point endPoint) {
-		this.endPoint = this.point2node(endPoint);
-		this.endPoint.setH(0);
-	}
-
-	public Node[][] getMap() {
-		return map;
-	}
-
-	public void setMap(Node[][] map) {
-		this.map = map;
-	}
-
-
-	public double getDistance() {
-		return distance;
 	}
 }

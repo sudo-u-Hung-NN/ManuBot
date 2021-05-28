@@ -265,7 +265,7 @@ public class ComputingCenter {
     }
 
     // Constructor
-    private ComputingCenter(Network network){
+    public ComputingCenter(Network network){
         this.variables = new Hashtable<>();
 
         this.P_tb = this.AverageWattage(network);
@@ -298,35 +298,35 @@ public class ComputingCenter {
 
     // Getter
 
-    private double getP_tb() {
+    public double getP_tb() {
         return P_tb;
     }
 
-    private double getEC() {
+    public double getEC() {
         return EC;
     }
 
-    private double getAverageLength_GiTS() {
+    public double getAverageLength_GiTS() {
         return AverageLength_GiTS;
     }
 
-    private double getAverageLength_STGo() {
+    public double getAverageLength_STGo() {
         return AverageLength_STGo;
     }
 
-    private double getAverageLength_STS() {
+    public double getAverageLength_STS() {
         return AverageLength_STS;
     }
 
-    private double getAverageLength_GiTGo() {
+    public double getAverageLength_GiTGo() {
         return AverageLength_GiTGo;
     }
 
-    private double getAverageWorkTrip() {
+    public double getAverageWorkTrip() {
         return AverageWorkTrip;
     }
 
-    private double getAverageTimeTrip() {
+    public double getAverageTimeTrip() {
         return AverageTimeTrip;
     }
 

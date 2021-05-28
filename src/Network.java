@@ -212,8 +212,9 @@ public class Network {
         // Initialize autoBots and setting ids
         System.out.println("Initializing AutoBots...");
         for (int i = 0; i < net.numManubot; i++) {
-            point X = new point(0, 0);
-            ManuBot mb = new ManuBot(i, map.point2node(X), map.getSwitchStateNodes());
+//            point X = new point(0, 0);
+            Node X = map.point2node(new point(0,0));
+            ManuBot mb = new ManuBot(i, X, map.getSwitchStateNodes());
             net.insertManuList(mb);
             System.out.println("AutoBot id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }

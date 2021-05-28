@@ -4,8 +4,8 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 public class point {
-    private double x;
-    private double y;
+    protected double x;
+    protected double y;
 
     public double getX() {
         return x;
