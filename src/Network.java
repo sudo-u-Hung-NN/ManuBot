@@ -133,6 +133,8 @@ public class Network {
             if (Math.abs(map.point2node(gto.getLocation()).getX() - location.getX()) < 0.001 && Math.abs(map.point2node(gto.getLocation()).getY() - location.getY()) < 0.001)
                 return gto;
         }
+        System.out.println(String.format("Location input (%.2f,%.2f) found no gate out", location.getX(), location.getY()));
+        System.exit(0);
         return null;
     }
 

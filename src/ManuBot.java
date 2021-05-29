@@ -97,7 +97,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
 
         this.location = nextNode;
 
-        switch (map.point2node(this.location).getType()){
+        switch (this.location.getType()){
             case GATE_IN:
                 network.getArrivalTask(this.workList.get(0));
                 assert this.workList.get(0) != null: "Invalid remove task";

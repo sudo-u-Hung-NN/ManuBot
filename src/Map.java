@@ -38,8 +38,8 @@ public class Map {
 			}
 
         for (TaskShelf tsh : network.getShelfList()) {
-			int nodeX = (int) (tsh.getLocation().getX() / distance);
-			int nodeY = (int) (tsh.getLocation().getY() / distance);
+			int nodeX = (int)(tsh.getLocation().getX() / distance);
+			int nodeY = (int)(tsh.getLocation().getY() / distance);
 
 			map[nodeX][nodeY].setType(manuType.SHELF);
 			map[nodeX][nodeY].setWalkable(false);
@@ -109,7 +109,7 @@ public class Map {
 			fileout.write("Map size: " + mapSize + "\n");
 			fileout.write("Factory size: " + factorySize + "\n");
 			fileout.write("Number of nodes: " + (mapSize + 1)*(mapSize + 1) + "\n");
-			fileout.write("VirtualM map size: " + mapSize * distance + "\n");
+			fileout.write("Virtual map size: " + mapSize * distance + "\n");
 			fileout.write("Number of time step total: " + simTime * speed * 1.0/distance + "\n");
 			fileout.write("Map detail\n");
 			for (int i = 0; i < mapSize + 1; i ++) {
@@ -162,15 +162,15 @@ public class Map {
 		for (Node near: currentNode.getNext()) {
 			System.out.print(String.format("\t(%.2f, %.2f)", near.getX(), near.getY()));
 			if ((Math.abs(near.getX() - destination.getX()) < 0.001 && Math.abs(near.getY() - destination.getY()) < 0.001) || near.id == destination.id) {
-				System.out.println("\nReach destination\n");
+				System.out.println("\nReach destination");
 				closeList.clear();
 				return near;
 			}
 			//
 			else if (!closeList.contains(near) && near.isWalkable()) {
 				double neighborDist = near.getLength(destination);
-				System.out.print(String.format("\t%.4f V", neighborDist));
-				if (currentDist >= neighborDist) {
+				System.out.print(String.format("\t%.5f V", neighborDist));
+				if (Double.compare(currentDist, neighborDist) == 1) {
 					currentDist = neighborDist;
 					nextNode = near;
 				}
