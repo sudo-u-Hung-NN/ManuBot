@@ -177,6 +177,9 @@ public class Map {
 			}
 			else {
 				System.out.print("\tX");
+				if(near.isObstacle()){
+					System.out.print("Z");
+				}
 			}
 		}
 		if (nextNode == null) {

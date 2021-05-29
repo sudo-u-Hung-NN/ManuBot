@@ -105,6 +105,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                 this.workList.get(0).withAutoBot = true;
                 this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
                 System.out.println("AutoBot id{" + this.objectId + "} at gate in, now goes to a shelf.");
+                map.cleanPath(this);
                 break;
             case GATE_OUT:
                 GateOut checkGateOut = network.amIatGateOut(location, map);
@@ -115,6 +116,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     this.workList.remove(0);
                     this.isTransporting = -1;
                 }
+                map.cleanPath(this);
                 break;
             case SHELF:
                 TaskShelf checkShelf = network.amIatShelf(location, map);
@@ -138,9 +140,11 @@ public class ManuBot extends ManuObject { // Manufacture robot
                         this.isTransporting = -1;
                     }
                 }
+                map.cleanPath(this);
                 break;
             case CHARGER:
                 System.out.println("This is charger!");
+                map.cleanPath(this);
                 break;
             case NONE:
                 break;
