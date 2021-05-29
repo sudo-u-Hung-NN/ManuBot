@@ -183,8 +183,11 @@ public class Map {
 			}
 		}
 		if (nextNode == null) {
-			System.out.println("\nReturn null in FindPath");
-			System.exit(-1);
+			closeList.clear();
+			return FindPath(currentNode, destination, mb);
+//			System.out.println("\nReturn null in FindPath");
+//			System.exit(-1);
+
 		}
 		System.out.println(String.format("\nFindPath: next go to this location: (%.2f, %.2f)\n", nextNode.getX(), nextNode.getY()));
 		closeList.add(currentNode);
