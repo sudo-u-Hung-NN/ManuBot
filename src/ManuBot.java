@@ -289,7 +289,8 @@ public class ManuBot extends ManuObject { // Manufacture robot
         this.pathNodeList.clear();
         // choose charger location
         this.charger = getCharger(net);
-        // Find path to charging point
+        // Clean path, Find path to charging point
+        map.cleanPath(this);
         getPath(location, map.point2node(this.charger.getLocation()) , map);
         // Determine charging time
         this.chargingTimeLeft = getChargeTime(this.charger, net, cycleTime, computingCenter);

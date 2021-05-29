@@ -187,4 +187,9 @@ public class Map {
 		closeList.add(currentNode);
 		return nextNode;
 	}
+
+	public void cleanPath(ManuBot mb) {
+		List<Node> closeList = this.closeListDictionary.get(mb.getID());
+		closeList.clear();
+	}
 }
