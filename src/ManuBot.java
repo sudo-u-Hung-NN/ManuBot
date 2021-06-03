@@ -245,14 +245,6 @@ public class ManuBot extends ManuObject { // Manufacture robot
 //        this.switchStateNodes = switchStateNodes;
     }
 
-    // Interface ends here, start modifying code under this line
-    //**********************************************************
-    // Methods to choose the charge point
-    /** @author Nguyen Nang Hung
-     * @param net
-     * network provide locations of charging points and their status
-     * @return the charger
-     */
     public Charger getCharger(Network net) {
         double minDistance = 10000;
         Charger output = null;
@@ -267,13 +259,6 @@ public class ManuBot extends ManuObject { // Manufacture robot
         return output;
     }
 
-    /** @author Nguyen Nang Hung
-     * The AutoBot charges itself for an amount of time, this time is determined
-     * as the output of this function
-     * if not adaptive, charge to a constant amount of energy
-     * @using after determining the charger (run getCharger)
-     * @return the duration for which the AutoBot stops at the charger
-     */
     public double getChargeTime(Charger chgr, Network net, double cycleTime, ComputingCenter center){
         if (this.isAdaptive){
             return center.getChargingTime(net, this, cycleTime);
@@ -283,11 +268,6 @@ public class ManuBot extends ManuObject { // Manufacture robot
         }
     }
 
-    /** @author Nguyen Nang Hung
-     * This function determine charging point, then insert path to that charger
-     * @param net
-     * @return charging energy per second of the chosen charger
-     */
     public double GoCharge(Network net, Map map, double cycleTime, ComputingCenter computingCenter){
         System.out.println("Clear pathNodeList in Gocharge");
         this.pathNodeList.clear();
@@ -308,4 +288,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
         }
         this.pathNodeList.add(map.FindPath(startPoint, endPoint, this));
     }
+
+    // Reinforcement learning
+
 }
