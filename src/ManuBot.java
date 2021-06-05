@@ -188,9 +188,9 @@ public class ManuBot extends ManuObject { // Manufacture robot
         if (this.isFunctional()) {
             validate(map);
             System.out.println("AutoBot id{" + this.objectId +"} is at (x, y) = (" + this.location.getX() +", " + this.location.getY() +
-                    "), current node type: " + map.point2node(this.location).getType());
+                    "), current node type: " + this.location.getType());
 
-            boolean t = map.point2node(this.location).isAtCharger();
+            boolean t = this.location.isAtCharger();
             if (this.chargingTimeLeft > 0 && t) {
                 assert ECperSec == 0: "Invalid charging energy called";
                 Ultilis.chargerPrintFile(this, charger, timeNow);

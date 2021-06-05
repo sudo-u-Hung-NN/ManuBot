@@ -170,7 +170,7 @@ public class Map {
 			else if (!closeList.contains(near) && near.isWalkable()) {
 				double neighborDist = near.getLength(destination);
 				System.out.print(String.format("\t%.5f V", neighborDist));
-				if (Double.compare(currentDist, neighborDist) == 1) {
+				if (currentDist > neighborDist) {
 					currentDist = neighborDist;
 					nextNode = near;
 				}
