@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -10,14 +9,14 @@ public class Ultilis {
     public static FileWriter gateOutWriter;
     public static FileWriter chargerWriter;
     public static FileWriter test_getAutoBot;
-    public static FileWriter test_SCA;
+    public static FileWriter RLWriter;
 
     public static final String generalFile = Config.getInstance().getAsString("generalFile");
     public static final String shelvesFile = Config.getInstance().getAsString("shelfFile");
     public static final String gateOutFile = Config.getInstance().getAsString("gateOutFile");
     public static final String chargerFile = Config.getInstance().getAsString("chargerFile");
     public static final String getAutoBotFile = Config.getInstance().getAsString("getAutoBotFile");
-    public static final String SCAFile = Config.getInstance().getAsString("SCAFile");
+    public static final String RLfile = Config.getInstance().getAsString("RLFile");
 
     public static List<FileWriter> manubotWriter = new LinkedList<>();
 
@@ -45,8 +44,7 @@ public class Ultilis {
             test_getAutoBot = new FileWriter(getAutoBotFile, false);
             test_getAutoBot.write("Time\tTaskID\tAutoBotID\tPurpose\n");
 
-            test_SCA = new FileWriter(SCAFile, false);
-            test_SCA.write("ResEnergy\tRk\tUk\tmu_greedy\tE_tb\tk\tmu_aterisk\n");
+            RLWriter = new FileWriter(RLfile, false);
 
         } catch (IOException e) {
             System.out.println("Failed to open file!");
@@ -92,13 +90,13 @@ public class Ultilis {
             }
 
             generalWriter.write(String.format(
-                    "%d\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%d\t%d\t%d\t%.2f\n",
+                    "%d\t%d\t%d\t%d\t%d\t%s\t%.2f\t%.2f\t%.2f\t%d\t%d\t%d\t%d\t%.2f\n",
                     network.getManuList().size(),
                     network.getGateInList().size(),
                     network.getGateOutList().size(),
                     network.getShelfList().size(),
                     network.getChargerList().size(),
-                    Config.getInstance().getAsDouble("fixed_energy_charge_level"),
+                    Config.getInstance().getAsBoolean("adaptive_charging") ? "RL" : Config.getInstance().getAsDouble("fixed_energy_charge_level"),
                     Double.parseDouble(Config.getInstance().getAsString("Gate_task_range").split(";")[0]),
                     Double.parseDouble(Config.getInstance().getAsString("Task_active_range").split(";")[0]),
                     Config.getInstance().getAsDouble("Factory_size"),
@@ -124,7 +122,7 @@ public class Ultilis {
             generalWriter.close();
             chargerWriter.close();
             test_getAutoBot.close();
-            test_SCA.close();
+            RLWriter.close();
         } catch (IOException e) {
             System.out.println("Failed to close file");
             e.printStackTrace();

@@ -31,6 +31,24 @@ public class Action implements Doable{
         this.value = (1 - learning_rate) * this.value + learning_rate * newValue;
     }
 
+    @Override
+    public String toString() {
+        return "Action{" +
+                "actionID=" + actionID +
+                ", actionName='" + actionName + '\'' +
+                ", value=" + value +
+                ", probTaken=" + probTaken +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) return false;
+        if (o == this) return true;
+        Action a = (Action)o;
+        return a.getActionID() == this.getActionID();
+    }
+
     public double getValue() {
         return this.value;
     }

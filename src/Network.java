@@ -126,7 +126,18 @@ public class Network {
         return true;
     }
 
-    
+    public int doneFrom(double timeMark) {
+        if (GateOut.count > 0) {
+            int done = 0;
+            for(int i = GateOut.count - 1; i > 0 && GateOut.timeRecords[i] > timeMark; i --) {
+                done++;
+            }
+            return done;
+        }
+        return 0;
+    }
+
+    public int botDead = 0;
 
     public GateOut amIatGateOut(Node location, Map map) {
         for (GateOut gto : this.GateOutList) {
@@ -200,7 +211,6 @@ public class Network {
             insertShelfList(ts);
             System.out.println("Shelf id{" + i + "} at location (" + X.getX() + "," + X.getY() + ") initialized");
         }
-
     }
 
     public static void main(String[] args) {
@@ -313,6 +323,8 @@ public class Network {
                     }
                 }
 
+                net.botDead = net.numManubot - botLive;
+
                 if (botLive == 0) {
                     System.out.println("All bot is non-functional");
                     check = 0;
@@ -326,6 +338,7 @@ public class Network {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
+            System.out.println("Simulation Completes");
             Ultilis.closeFile();
         }
 

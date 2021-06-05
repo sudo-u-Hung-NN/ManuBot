@@ -15,7 +15,7 @@ public class Policy {
         else {
             double max = -10e3;
             for(int i = 0; i < actions.size(); i ++) {
-                if (actions.get(i).getValue() > max) {
+                if (actions.get(i).getValue() >= max) {
                     max = actions.get(i).getValue();
                     index = i;
                 }

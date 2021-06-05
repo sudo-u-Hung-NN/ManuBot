@@ -135,7 +135,7 @@ public class ComputingCenter {
      * @author Nguyen Nang Hung
      * @return avergae energy of the net right now
      */
-    private double AverageEnergy(Network network){
+    public double AverageEnergy(Network network){
         double S = 0;
         List<ManuBot> manulist = network.getManuList();
         if (manulist.isEmpty()) return 0;

@@ -1,3 +1,6 @@
+import Reinforce.MAB.ValueTable;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +20,15 @@ public class ManuBot extends ManuObject { // Manufacture robot
     private Charger charger;
     private double ResEnergy;       // Energy at the momemomentnt  (J)
     private Node location;
+
+    // Reinforcement learning
+    private ValueTable TB;
+    private int pX = 0;
+    private double timeMark = 0;
+
+    public void printTable() {
+        this.TB.printTable();
+    }
 
     public Node getLocation() {
         return location;
@@ -106,6 +118,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                 this.workList.get(0).setNextStop(this.workList.get(0).getShelfLocation());
                 System.out.println("AutoBot id{" + this.objectId + "} at gate in, now goes to a shelf.");
                 map.cleanPath(this);
+                pX ++;
                 break;
             case GATE_OUT:
                 GateOut checkGateOut = network.amIatGateOut(location, map);
@@ -117,6 +130,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     this.isTransporting = -1;
                 }
                 map.cleanPath(this);
+                pX ++;
                 break;
             case SHELF:
                 TaskShelf checkShelf = network.amIatShelf(location, map);
@@ -141,6 +155,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     }
                 }
                 map.cleanPath(this);
+                pX++;
                 break;
             case CHARGER:
                 System.out.println("This is charger!");
@@ -167,6 +182,9 @@ public class ManuBot extends ManuObject { // Manufacture robot
 
     public Double ECperSec = 0.0;
     public void Running(Network net, Map map, double cycleTime, double timeNow, ComputingCenter CC) throws IOException{
+        if (TB == null) {
+            TB = new ValueTable(this.InitEnergy, this.ThshEnergy, CC.getP_tb());
+        }
         if (this.isFunctional()) {
             validate(map);
             System.out.println("AutoBot id{" + this.objectId +"} is at (x, y) = (" + this.location.getX() +", " + this.location.getY() +
@@ -195,6 +213,7 @@ public class ManuBot extends ManuObject { // Manufacture robot
                     moving(this.pathNodeList.get(0), net, map, timeNow);
                 }
                 else {
+                    System.out.println("I. AutoBot id{" + this.objectId + "}, Energy: " + this.getResEnergy() + " doing nothing at charger");
                     this.setResEnergy(this.getResEnergy() + cycleTime * ECperSec);
                 }
             }
@@ -242,7 +261,6 @@ public class ManuBot extends ManuObject { // Manufacture robot
         setID(ID);
         setLocation(Location);
         setResEnergy(InitEnergy);
-//        this.switchStateNodes = switchStateNodes;
     }
 
     public Charger getCharger(Network net) {
@@ -259,9 +277,24 @@ public class ManuBot extends ManuObject { // Manufacture robot
         return output;
     }
 
-    public double getChargeTime(Charger chgr, Network net, double cycleTime, ComputingCenter center){
+    public double getChargeTime(Charger chgr, Network net, double timeNow, ComputingCenter center) {
         if (this.isAdaptive){
-            return center.getChargingTime(net, this, cycleTime);
+//            return center.getChargingTime(net, this, cycleTime);
+            if(timeMark != 0) {
+                int pS = net.doneFrom(timeMark);
+                int dead = net.botDead;
+                double reward = pX * 1.0/pS * Math.sqrt(timeNow - timeMark) / (1 + dead);
+                TB.updateValue(reward);
+            }
+            timeMark = timeNow;
+            double chargelevel = TB.takeAction(net.getChargingList().size(), center.AverageEnergy(net));
+            if (chargelevel < 0.5) {
+                System.out.println("False RL");
+                System.exit(-1);
+            }
+            System.out.println("Right RL: " + chargelevel);
+            System.out.println("Charging time: " + (this.InitEnergy * chargelevel - this.ResEnergy) / (chgr.getECperSec() - this.EWperSec));
+            return (this.InitEnergy * chargelevel - this.ResEnergy) / (chgr.getECperSec() - this.EWperSec);
         }
         else{
             return (this.InitEnergy * this.ChargeLevel - this.ResEnergy) / (chgr.getECperSec() - this.EWperSec);
@@ -288,7 +321,4 @@ public class ManuBot extends ManuObject { // Manufacture robot
         }
         this.pathNodeList.add(map.FindPath(startPoint, endPoint, this));
     }
-
-    // Reinforcement learning
-
 }
